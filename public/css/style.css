@@ -1,0 +1,536 @@
+/* Google Fonts - Inter for clean SaaS look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Define CSS Variables */
+:root {
+    --color-primary: #1f2937;          /* dark primary */
+    --color-accent: #f59e0b;           /* accent / highlight */
+    --color-bg: #f3f4f6;               /* light background */
+    --color-card: #ffffff;             /* card background */
+    --color-text: #111827;             /* main text */
+    --color-muted: #6b7280;            /* secondary text */
+    --color-success: #10b981;          /* success */
+    --color-warning: #f59e0b;          /* warning */
+    --color-danger: #ef4444;           /* danger */
+    --shadow-light: 0 4px 20px rgba(0,0,0,0.05);
+    
+    --shadow-hover: 0 15px 30px rgba(0, 0, 0, 0.1);
+    
+    /* Custom Modal Variables */
+    --modal-radius: 20px;
+    --modal-glass: rgba(255, 255, 255, 0.95);
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Lock global scroll */
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-bg);
+}
+
+/* Sidebar Styling (.sidebar) */
+#wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#sidebar-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    margin-left: -250px;
+    transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 250px;
+    background: #111827 !important;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    z-index: 1020;
+    flex-shrink: 0;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+#page-content-wrapper {
+    flex: 1;
+    min-width: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg);
+}
+
+.sidebar-heading {
+    padding: 2rem 1.25rem;
+    font-size: 1.3rem;
+    font-weight: 800 !important;
+    color: #fff;
+    letter-spacing: 2px;
+    background: linear-gradient(to right, #1f2937, #111827);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-menu {
+    padding: 0.75rem;
+}
+
+#sidebar-wrapper .sidebar-link, 
+#sidebar-wrapper .list-group-item, 
+#sidebar-wrapper .nav-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px !important;
+    margin-bottom: 4px;
+    padding: 0.8rem 1.2rem !important;
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.7) !important;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    white-space: nowrap;
+}
+
+#sidebar-wrapper .sidebar-link i, 
+#sidebar-wrapper .nav-link i {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+}
+
+#sidebar-wrapper .sidebar-link:hover, 
+#sidebar-wrapper .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+    transform: translateX(5px);
+}
+
+#sidebar-wrapper .sidebar-link:hover i, 
+#sidebar-wrapper .nav-link:hover i {
+    transform: scale(1.2);
+    color: var(--color-accent) !important;
+}
+
+#sidebar-wrapper .sidebar-active, 
+#sidebar-wrapper .list-group-item.active, 
+#sidebar-wrapper .nav-link.active {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)) !important;
+    color: var(--color-accent) !important;
+    font-weight: 700 !important;
+    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.25);
+}
+
+#sidebar-wrapper .sidebar-active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 4px;
+    background: var(--color-accent);
+    border-radius: 0 4px 4px 0;
+    box-shadow: 2px 0 10px rgba(245, 158, 11, 0.5);
+}
+
+#sidebar-wrapper .sidebar-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    transition: 0.5s;
+}
+
+#sidebar-wrapper .sidebar-link:hover::before {
+    left: 100%;
+}
+
+/* Top Navbar */
+.navbar {
+    z-index: 1001; /* Higher than sidebar */
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+    padding: 0.75rem 0 !important;
+    position: sticky;
+    top: 0;
+}
+
+#sidebarToggle {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+#sidebarToggle:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Buttons */
+.btn-logout {
+    font-weight: 600;
+}
+
+.btn-rounded {
+    border-radius: 50rem !important;
+}
+
+/* Cards & Containers */
+.card {
+    border: none;
+    border-radius: 12px;
+    background-color: var(--color-card);
+}
+
+.card-shadow {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+}
+
+/* Premium Dropdowns */
+.dropdown-menu {
+    border-radius: 16px !important;
+    padding: 0.8rem !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block !important;
+    background: #ffffff !important;
+    z-index: 2000;
+}
+
+.fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.4s ease;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    border-radius: 10px !important;
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b !important; /* Darker text */
+    transition: all 0.2s;
+    margin-bottom: 2px;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background: #111827 !important; /* Dark background on hover */
+    color: #f59e0b !important; /* Gold text on hover - SUPER VISIBLE */
+    transform: translateX(5px);
+}
+
+.dropdown-item.active {
+    background: #f59e0b !important;
+    color: white !important;
+}
+
+.dropdown-item i {
+    width: 20px;
+    display: inline-block;
+}
+
+.dropdown-divider {
+    border-top: 1px solid #f3f4f6;
+    margin: 0.6rem 0;
+}
+
+.stats-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover) !important;
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+/* Tables */
+.table {
+    vertical-align: middle;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+/* Ensure table-responsive doesn't clip sticky headers */
+.table-responsive {
+    overflow: visible !important;
+}
+
+/* For pages where global overflow is restricted, ensure content wrapper allows sticky */
+#page-content-wrapper {
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Badges */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.badge-available { background-color: #198754; color: white; }
+.badge-booked { background-color: #dc3545; color: white; }
+.badge-occupied { background-color: #0d6efd; color: white; }
+.badge-cleaning { background-color: #ffc107; color: #000; }
+.badge-maintenance { background-color: #6c757d; color: white; }
+
+/* Visual Floor Layout Grids */
+.room-box {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.room-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.room-box .status-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.room-type-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-top: 5px;
+    background: rgba(0,0,0,0.2);
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+/* Room Box Colors mapped to status */
+.room-available { background: linear-gradient(135deg, #20c997, #198754); }
+.room-booked { background: linear-gradient(135deg, #f87171, #dc3545); }
+.room-occupied { background: linear-gradient(135deg, #60a5fa, #0d6efd); }
+.room-cleaning { background: linear-gradient(135deg, #fcd34d, #ffc107); color: #854d0e; }
+.room-maintenance { background: linear-gradient(135deg, #9ca3af, #6c757d); }
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+}
+
+/* Alerts & Notifications */
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 350px;
+    max-width: calc(100vw - 40px);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Premium Custom Modals --- */
+.modal.fade .modal-dialog {
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+/* --- Premium Custom Modals --- */
+.modal-content {
+    border: none !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.modal-header {
+    background: #1f2937 !important;
+    color: white !important;
+    padding: 1.5rem 2.5rem !important;
+    border-bottom: 2px solid #f59e0b !important; /* Gold accent line */
+}
+
+.modal-title {
+    font-weight: 800 !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: all 0.2s;
+}
+
+.modal-header .btn-close:hover {
+    transform: rotate(90deg);
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 2rem !important;
+}
+
+.modal-footer {
+    padding: 1.25rem 2rem !important;
+    border-top: 1px solid rgba(0,0,0,0.05) !important;
+    background: #fcfcfc;
+}
+
+/* Custom Modal Form Styling */
+.modal .form-label {
+    font-weight: 600;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal .form-control, .modal .form-select {
+    border: 1.5px solid #eee !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.2s;
+    background: #fdfdfd !important;
+}
+
+.modal .form-control:focus {
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15) !important;
+    background: white !important;
+}
+
+/* --- iziToast Luxury Overrides --- */
+.iziToast {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.iziToast-body {
+    padding-left: 10px !important;
+}
+
+.iziToast.iziToast-color-green {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+.iziToast.iziToast-color-red {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+/* --- iziModal Luxury Style --- */
+.iziModal {
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2) !important;
+}
+
+.iziModal .iziModal-header {
+    background: #1f2937 !important;
+    padding: 20px !important;
+}
+
+.iziModal .iziModal-header-title {
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+    #page-content-wrapper {
+        width: auto; /* Let flexBox handle it */
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -250px;
+    }
+}

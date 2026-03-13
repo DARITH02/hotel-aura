@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Allow access if request already starts with public/
+RewriteCond %{REQUEST_URI} ^/public/ [NC]
+RewriteRule ^(.*)$ $1 [L]
+
+# Otherwise rewrite to public/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]
