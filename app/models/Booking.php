@@ -1,7 +1,7 @@
 <?php
 class Booking extends Model {
     public function getAllBookingsWithDetails() {
-        $query = "SELECT b.*, g.name as guest_name, g.phone as guest_phone, r.room_number 
+        $query = "SELECT b.*, g.name as guest_name, g.phone as guest_phone, g.telegram_chat_id, r.room_number 
                   FROM bookings b 
                   JOIN guests g ON b.guest_id = g.id 
                   JOIN rooms r ON b.room_id = r.id 
@@ -10,7 +10,7 @@ class Booking extends Model {
     }
     public function getBookingById($id) {
         $stmt = $this->db->prepare("
-            SELECT b.*, g.name as guest_name, g.email as guest_email, g.phone as guest_phone, 
+            SELECT b.*, g.name as guest_name, g.email as guest_email, g.phone as guest_phone, g.telegram_chat_id, 
                    r.room_number, rt.name as room_type, rt.price as room_price
             FROM bookings b 
             JOIN guests g ON b.guest_id = g.id 

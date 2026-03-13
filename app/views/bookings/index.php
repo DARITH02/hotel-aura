@@ -60,7 +60,12 @@
                                         <?= strtoupper($booking['guest_name'] ? $booking['guest_name'][0] : 'G') ?>
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-dark mb-0"><?= htmlspecialchars($booking['guest_name']) ?></div>
+                                        <div class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                            <?= htmlspecialchars($booking['guest_name']) ?>
+                                            <?php if (!empty($booking['telegram_chat_id'])): ?>
+                                                <i class="bi bi-telegram text-info" title="Linked to Telegram"></i>
+                                            <?php endif; ?>
+                                        </div>
                                         <div class="x-small text-muted d-flex align-items-center tracking-widest">
                                             <i class="bi bi-telephone me-1"></i><?= htmlspecialchars($booking['guest_phone'] ?: 'N/A') ?>
                                         </div>

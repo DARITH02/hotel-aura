@@ -114,23 +114,8 @@ class BookingController extends Controller {
                     $this->roomModel->update($room['id'], $room);
                 }
 
-                // 3. TELEGRAM NOTIFICATION
-                $botToken = "8642404952:AAFN6fsTjticiS0HcW4djWrQj5DOuT2-OFw"; 
-                $chatId = "8642404952"; 
-                
-                $cleanPhone = str_replace(['+', ' ', '-'], '', $booking['guest_phone']);
-                $message = "✅ *Booking CONFIRMED*\n\n";
-                $message .= "*Booking ID:* #" . $id . "\n";
-                $message .= "*Guest:* " . $booking['guest_name'] . "\n";
-                $message .= "*Phone:* " . $booking['guest_phone'] . "\n";
-                $message .= "*Room:* " . ($room['room_number'] ?? 'N/A') . "\n";
-                $message .= "*Status:* Updated to Confirmed in DB\n";
-                $message .= "*Amount:* $" . number_format($booking['total_price'], 2) . "\n\n";
-                
-                $message .= "💬 [Message Guest on Telegram](https://t.me/+" . $cleanPhone . ")";
-
-                $url = "https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $chatId . "&text=" . urlencode($message) . "&parse_mode=Markdown";
-                @file_get_contents($url);
+                // 3. TELEGRAM NOTIFICATION (Helper handles Admin + Guest)
+                $this->notifyTelegram($booking, 'confirmed');
 
                 if ($isAjax) {
                     header('Content-Type: application/json');
@@ -157,6 +142,10 @@ class BookingController extends Controller {
                 $room = $this->roomModel->getRoomById($booking['room_id']);
                 $room['status'] = 'occupied';
                 $this->roomModel->update($room['id'], $room);
+
+                // Notify Telegram
+                $updatedBooking = $this->bookingModel->getBookingById($id); // Get fresh data for total price/details
+                $this->notifyTelegram($updatedBooking, 'occupied');
                 
                 if ($isAjax) {
                     header('Content-Type: application/json');
@@ -189,6 +178,9 @@ class BookingController extends Controller {
                 $room = $this->roomModel->getRoomById($booking['room_id']);
                 $room['status'] = 'available';
                 $this->roomModel->update($room['id'], $room);
+
+                // Notify Telegram
+                $this->notifyTelegram($booking, 'checked_out');
                 
                 if ($isAjax) {
                     header('Content-Type: application/json');
@@ -221,6 +213,9 @@ class BookingController extends Controller {
                 $room = $this->roomModel->getRoomById($booking['room_id']);
                 $room['status'] = 'available';
                 $this->roomModel->update($room['id'], $room);
+
+                // Notify Telegram
+                $this->notifyTelegram($booking, 'cancelled');
                 
                 if ($isAjax) {
                     header('Content-Type: application/json');
@@ -237,5 +232,74 @@ class BookingController extends Controller {
             }
         }
         $this->redirect('bookings');
+    }
+
+    /**
+     * Unified Telegram Notification Helper
+     * Notifies Admin and Guest (if linked)
+     */
+    private function notifyTelegram($booking, $status) {
+        if (!$booking) return;
+
+        // Configuration
+        $botToken = "8642404952:AAFN6fsTjticiS0HcW4djWrQj5DOuT2-OFw";
+        $adminChatId = "8642404952"; // Hotel Admin/Channel
+        
+        // Fetch Payment Summary for this booking
+        $paymentModel = new Payment();
+        $payments = $paymentModel->getPaymentsByBooking($booking['id']);
+        $totalPaid = array_sum(array_column($payments, 'amount'));
+        $balance = $booking['total_price'] - $totalPaid;
+
+        $statusEmoji = [
+            'confirmed' => '✅',
+            'occupied' => '🔑',
+            'checked_out' => '🧾',
+            'cancelled' => '❌'
+        ];
+        
+        $emoji = $statusEmoji[$status] ?? 'ℹ️';
+        // Force uppercase for status in both languages
+        $statusEN = strtoupper(str_replace('_', ' ', $status)); 
+        $statusKH = strtoupper(__($status));
+
+        // Format Admin Message (Bilingual Labels for Professionalism & Clarity)
+        $adminMsg = "$emoji *Booking $statusEN / " . __('tg_booking_status') . ": $statusKH*\n";
+        $adminMsg .= "━━━━━━━━━━━━━━━━━━\n";
+        $adminMsg .= "🆔 *ID:* #" . $booking['id'] . " / " . __('id') . "\n";
+        $adminMsg .= "👤 *Guest:* " . $booking['guest_name'] . " / " . __('tg_guest') . "\n";
+        $adminMsg .= "📞 *Phone:* " . $booking['guest_phone'] . " / " . __('tg_phone') . "\n";
+        $adminMsg .= "🚪 *Room:* #" . ($booking['room_number'] ?? 'N/A') . " / " . __('tg_room') . "\n";
+        $adminMsg .= "📅 *Stay:* " . date('d M', strtotime($booking['check_in'])) . " - " . date('d M', strtotime($booking['check_out'])) . " / " . __('tg_stay') . "\n";
+        $adminMsg .= "━━━━━━━━━━━━━━━━━━\n";
+        $adminMsg .= "💰 *Total:* $" . number_format($booking['total_price'], 2) . " / " . __('tg_total') . "\n";
+        $adminMsg .= "💵 *Paid:* $" . number_format($totalPaid, 2) . " / " . __('tg_paid') . "\n";
+        $adminMsg .= "🛑 *Balance:* $" . number_format($balance, 2) . " / " . __('tg_balance') . "\n";
+        $adminMsg .= "━━━━━━━━━━━━━━━━━━\n\n";
+        
+        $cleanPhone = str_replace(['+', ' ', '-'], '', $booking['guest_phone']);
+        $adminMsg .= "💬 [" . __('tg_chat_with_guest') . " / " . __('tg_chat_with_guest') . "](https://t.me/+" . $cleanPhone . ")";
+
+        // 1. Notify Admin
+        $adminUrl = "https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $adminChatId . "&text=" . urlencode($adminMsg) . "&parse_mode=Markdown";
+        @file_get_contents($adminUrl);
+
+        // 2. Notify Guest if they have linked their Telegram
+        if (!empty($booking['telegram_chat_id'])) {
+            $guestMsg = "Hello " . $booking['guest_name'] . "! 👋\n";
+            $guestMsg .= "Your booking # " . $booking['id'] . " status: *$statusEN*\n";
+            $guestMsg .= "---------------------\n";
+            $guestMsg .= "សួស្តី " . $booking['guest_name'] . "! 👋\n";
+            $guestMsg .= "ការកក់លេខ " . $booking['id'] . " ស្ថានភាព: *$statusKH*\n\n";
+            
+            $guestMsg .= "💰 *Total / " . __('tg_total') . ":* $" . number_format($booking['total_price'], 2) . "\n";
+            $guestMsg .= "💵 *Paid / " . __('tg_paid') . ":* $" . number_format($totalPaid, 2) . "\n";
+            $guestMsg .= "🛑 *Balance / " . __('tg_balance') . ":* $" . number_format($balance, 2) . "\n\n";
+            
+            $guestMsg .= "Thank you for choosing AURA / សូមអរគុណ!";
+
+            $guestUrl = "https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $booking['telegram_chat_id'] . "&text=" . urlencode($guestMsg) . "&parse_mode=Markdown";
+            @file_get_contents($guestUrl);
+        }
     }
 }

@@ -303,5 +303,18 @@ return [
     'save_payment' => 'Save Payment',
     'confirm' => 'Confirm',
     'amount' => 'Amount',
-    'quantity' => 'Quantity'
+    'quantity' => 'Quantity',
+    'tg_booking_status' => 'Booking Status',
+    'tg_booking_id' => 'Booking ID',
+    'tg_guest' => 'Guest',
+    'tg_phone' => 'Phone',
+    'tg_room' => 'Room',
+    'tg_stay' => 'Stay',
+    'tg_total' => 'Total',
+    'tg_chat_with_guest' => 'Chat with Guest',
+    'tg_guest_hello' => 'Hello',
+    'tg_guest_update_msg' => 'Your luxury stay booking #%s has been updated to *%s*.',
+    'tg_guest_thank_you' => 'Thank you for choosing AURA.',
+    'tg_paid' => 'Amount Paid',
+    'tg_balance' => 'Remaining Balance'
 ];
