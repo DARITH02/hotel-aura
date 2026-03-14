@@ -51,4 +51,14 @@ class Admin extends Model {
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
+
+    public function getSuperAdminCount() {
+        return (int) $this->db->query("SELECT COUNT(*) FROM admins WHERE role = 'super_admin'")->fetchColumn();
+    }
+
+    public function getSuperAdmin() {
+        $stmt = $this->db->prepare("SELECT * FROM admins WHERE role = 'super_admin' LIMIT 1");
+        $stmt->execute();
+        return $stmt->fetch();
+    }
 }

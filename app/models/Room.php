@@ -54,6 +54,12 @@ class Room extends Model {
         return $stmt->execute([$id]);
     }
 
+    public function countBookings($id) {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM bookings WHERE room_id = ?");
+        $stmt->execute([$id]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function getAvailableRoomByType($typeId) {
         $stmt = $this->db->prepare("
             SELECT r.* FROM rooms r 

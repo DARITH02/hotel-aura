@@ -189,13 +189,39 @@ class RoomController extends Controller {
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
         if (isset($_GET['id'])) {
-            $this->roomModel->delete($_GET['id']);
-            if ($isAjax) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => 'Room deleted successfully.']);
-                exit;
+            $id = $_GET['id'];
+
+            // Check if room has any bookings
+            $bookingCount = $this->roomModel->countBookings($id);
+            if ($bookingCount > 0) {
+                $msg = "Cannot delete room: it has {$bookingCount} booking(s) on record. Cancel or delete the bookings first.";
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $msg]);
+                    exit;
+                }
+                $_SESSION['error_msg'] = $msg;
+                $this->redirect('rooms');
+                return;
             }
-            $_SESSION['success_msg'] = "Room deleted successfully.";
+
+            try {
+                $this->roomModel->delete($id);
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'message' => 'Room deleted successfully.']);
+                    exit;
+                }
+                $_SESSION['success_msg'] = 'Room deleted successfully.';
+            } catch (Exception $e) {
+                $msg = 'Cannot delete room: it is linked to existing records.';
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $msg]);
+                    exit;
+                }
+                $_SESSION['error_msg'] = $msg;
+            }
         } else {
             if ($isAjax) {
                 header('Content-Type: application/json');

@@ -20,7 +20,13 @@
                 </div>
                 <div class="user-info overflow-hidden">
                     <h6 class="mb-0 fw-bold text-white text-truncate"><?= htmlspecialchars($_SESSION['admin_name'] ?? 'Admin') ?></h6>
-                    <small class="text-white-50"><?= $_SESSION['admin_role'] ?? 'Administrator' ?></small>
+                    <small class="text-white-50 d-flex align-items-center gap-1">
+                        <?php if (($_SESSION['admin_role'] ?? '') === 'super_admin'): ?>
+                            <i class="bi bi-shield-fill-check" style="color:#f59e0b;font-size:0.7rem;"></i> Super Admin
+                        <?php else: ?>
+                            <i class="bi bi-person-badge-fill" style="color:rgba(255,255,255,0.4);font-size:0.7rem;"></i> Admin
+                        <?php endif; ?>
+                    </small>
                 </div>
             </div>
 
@@ -64,10 +70,12 @@
                 </a>
 
                 <div class="menu-label px-4 pb-2 mt-3"><?= __('system') ?></div>
+                <?php if (($_SESSION['admin_role'] ?? '') === 'super_admin'): ?>
                 <a href="<?= BASE_URL ?>/admins" class="sidebar-item <?= (strpos($_SERVER['REQUEST_URI'], '/admins') !== false) ? 'active' : '' ?>">
                     <i class="bi bi-shield-lock-fill text-info"></i>
                     <span><?= __('admins') ?></span>
                 </a>
+                <?php endif; ?>
             </div>
         </div>
 

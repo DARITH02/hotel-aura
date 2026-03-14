@@ -97,7 +97,7 @@ if (array_key_exists($url, $routes)) {
         die("Controller $controllerName not found");
     }
 } else {
-    // Basic 404
+    // Luxury 404 Page
     header("HTTP/1.0 404 Not Found");
-    echo "<h1>404 Not Found</h1><p>The page '$url' does not exist.</p><a href='" . BASE_URL . "/'>Go Home</a>";
+    include __DIR__ . '/../app/views/errors/404.php';
 }
