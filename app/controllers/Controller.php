@@ -31,4 +31,29 @@ class Controller {
             $this->redirect('login');
         }
     }
+
+    /**
+     * Centralized Telegram Sender
+     */
+    protected function sendTelegramMessage($chatId, $message) {
+        $botToken = "8642404952:AAFN6fsTjticiS0HcW4djWrQj5DOuT2-OFw";
+        $url = "https://api.telegram.org/bot" . $botToken . "/sendMessage";
+        
+        $postData = [
+            'chat_id' => $chatId,
+            'text' => $message,
+            'parse_mode' => 'Markdown',
+            'disable_web_page_preview' => false
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
 }

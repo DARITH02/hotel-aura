@@ -79,12 +79,18 @@
         }
 
         .luxury-sidebar {
-            width: var(--sidebar-width);
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1000;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            scrollbar-width: none !important; /* Firefox */
+            -ms-overflow-style: none !important; /* IE and Edge */
+        }
+
+        .luxury-sidebar::-webkit-scrollbar {
+            display: none !important; /* Chrome, Safari and Opera */
         }
 
         .brand-glass-box {
@@ -99,10 +105,10 @@
             font-size: 22px;
         }
 
-        .text-gold { color: #c5a059; }
+        .text-gold { color: #c5a059 !important; }
         .brand-name {
-            font-family: 'Playfair Display', serif;
-            color: white;
+            font-family: 'Playfair Display', serif !important;
+            color: white !important;
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 800;
@@ -112,6 +118,7 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             font-weight: 700;
+            color: #c5a059 !important;
         }
 
         .sidebar-user-card {
@@ -140,6 +147,7 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: rgba(255, 255, 255, 0.3);
+            padding: 0 24px;
         }
 
         .sidebar-item {
@@ -148,7 +156,7 @@
             padding: 12px 24px;
             margin: 4px 16px;
             border-radius: 14px;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.6) !important;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
@@ -164,13 +172,13 @@
         }
 
         .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: white !important;
             transform: translateX(5px);
         }
 
         .sidebar-item.active {
-            background: var(--gold-gradient);
+            background: var(--gold-gradient) !important;
             color: white !important;
             box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
         }

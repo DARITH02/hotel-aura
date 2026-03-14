@@ -1,5 +1,5 @@
 /* Google Fonts - Inter for clean SaaS look */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
 /* Define CSS Variables */
 :root {
     --color-primary: #1f2937;          /* dark primary */
@@ -15,17 +15,27 @@
     
     --shadow-hover: 0 15px 30px rgba(0, 0, 0, 0.1);
     
-    /* Custom Modal Variables */
     --modal-radius: 20px;
     --modal-glass: rgba(255, 255, 255, 0.95);
+    
+    --aura-gold: #c5a059;
+    --gold-gradient: linear-gradient(135deg, #c5a059 0%, #a88746 100%);
+    --glass-bg: rgba(15, 23, 42, 0.95);
 }
 
 html, body {
-    height: 100%;
+    height: 100vh;
     margin: 0;
-    overflow: hidden; /* Lock global scroll */
+    padding: 0;
+    overflow-x: hidden;
     font-family: 'Inter', sans-serif;
     background-color: var(--color-bg);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;
 }
 
 /* Sidebar Styling (.sidebar) */
@@ -39,17 +49,70 @@ html, body {
 #sidebar-wrapper {
     height: 100vh;
     overflow-y: auto;
-    margin-left: -250px;
+    overflow-x: hidden;
+    margin-left: -280px;
     transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 250px;
+    width: 280px;
     background: #111827 !important;
     box-shadow: 10px 0 30px rgba(0,0,0,0.1);
     z-index: 1020;
     flex-shrink: 0;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+#sidebar-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+
+
+/* Luxury Branding & Logo Styles */
+.brand-glass-box {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.text-gold { color: var(--aura-gold); }
+.brand-name {
+    font-family: 'Playfair Display', serif;
+    color: white;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+.brand-subtext {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 700;
+    color: var(--aura-gold);
 }
 
 #wrapper.toggled #sidebar-wrapper {
     margin-left: 0;
+}
+
+.sidebar-brand-container {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar-nav-container {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar-nav-container::-webkit-scrollbar {
+    display: none;
 }
 
 #page-content-wrapper {
@@ -62,6 +125,12 @@ html, body {
     display: flex;
     flex-direction: column;
     background-color: var(--color-bg);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+#page-content-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar-heading {
@@ -81,51 +150,92 @@ html, body {
 }
 
 #sidebar-wrapper .sidebar-link, 
+#sidebar-wrapper .sidebar-item,
 #sidebar-wrapper .list-group-item, 
 #sidebar-wrapper .nav-link {
     font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     margin-bottom: 4px;
-    padding: 0.8rem 1.2rem !important;
+    margin-left: 16px;
+    margin-right: 16px;
+    padding: 12px 24px !important;
     display: flex;
     align-items: center;
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
     position: relative;
     overflow: hidden;
     background: transparent;
     border: none;
+    text-decoration: none;
     white-space: nowrap;
 }
 
 #sidebar-wrapper .sidebar-link i, 
+#sidebar-wrapper .sidebar-item i,
 #sidebar-wrapper .nav-link i {
-    font-size: 1.1rem;
-    margin-right: 12px;
+    font-size: 1.25rem;
+    margin-right: 15px;
+    width: 24px;
+    text-align: center;
     transition: all 0.3s ease;
 }
 
 #sidebar-wrapper .sidebar-link:hover, 
+#sidebar-wrapper .sidebar-item:hover,
 #sidebar-wrapper .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
     color: #fff !important;
     transform: translateX(5px);
 }
 
 #sidebar-wrapper .sidebar-link:hover i, 
+#sidebar-wrapper .sidebar-item:hover i,
 #sidebar-wrapper .nav-link:hover i {
-    transform: scale(1.2);
-    color: var(--color-accent) !important;
+    transform: scale(1.1);
+    color: #fff !important;
 }
 
 #sidebar-wrapper .sidebar-active, 
+#sidebar-wrapper .sidebar-item.active,
 #sidebar-wrapper .list-group-item.active, 
 #sidebar-wrapper .nav-link.active {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)) !important;
-    color: var(--color-accent) !important;
+    background: var(--gold-gradient) !important;
+    color: white !important;
     font-weight: 700 !important;
-    box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.25);
+    box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2) !important;
+}
+
+#sidebar-wrapper .sidebar-item.active i {
+    color: white !important;
+}
+
+.sidebar-user-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+.sidebar-user-card:hover { border-color: rgba(197, 160, 89, 0.3); background: rgba(255, 255, 255, 0.05); }
+
+.status-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--glass-bg);
+}
+.status-indicator.online { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+
+.menu-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 #sidebar-wrapper .sidebar-active::after {
@@ -531,6 +641,248 @@ html, body {
         width: auto; /* Let flexBox handle it */
     }
     #wrapper.toggled #sidebar-wrapper {
-        margin-left: -250px;
+        margin-left: -280px;
     }
+}
+
+/* LUXURY COMPONENT REFINEMENTS */
+.icon-box, .icon-box-sm {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    border-radius: 12px;
+}
+
+.btn-primary-soft {
+    background: rgba(31, 41, 55, 0.05) !important;
+    color: #1f2937 !important;
+    border: 1px solid rgba(31, 41, 55, 0.1) !important;
+    transition: all 0.2s ease;
+}
+.btn-primary-soft:hover {
+    background: rgba(31, 41, 55, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+.btn-success-soft {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+/* LUXURY MODAL & INPUT SYSTEM */
+.luxury-modal {
+    border-radius: 28px !important;
+}
+
+.luxury-modal .modal-header { 
+    background: #111827 !important; 
+    color: white !important; 
+    padding: 1.75rem 2rem !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+.luxury-modal .modal-title { 
+    font-size: 1.15rem; 
+    font-weight: 800;
+    letter-spacing: 0.05em; 
+    text-transform: uppercase;
+}
+
+.luxury-modal .modal-body {
+    padding: 2rem !important;
+}
+
+.luxury-modal .modal-footer {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    padding: 0 2rem 2rem 2rem !important;
+    gap: 12px !important;
+}
+
+.luxury-input-group { 
+    position: relative; 
+    margin-bottom: 1.5rem !important; 
+}
+
+.luxury-label { 
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    color: #475569; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+    margin-bottom: 10px; 
+    display: block; 
+    padding-left: 4px;
+}
+
+.input-wrapper {
+    display: flex; 
+    align-items: center; 
+    background: #f8fafc; 
+    border: 1.5px solid #edf2f7; 
+    border-radius: 20px; 
+    padding: 0 22px; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+}
+
+.input-wrapper:focus-within { 
+    border-color: #111827; 
+    background: white; 
+    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1); 
+    transform: translateY(-1px);
+}
+
+.input-wrapper .icon { 
+    color: #64748b; 
+    font-size: 1.1rem; 
+    margin-right: 14px; 
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+}
+
+.input-wrapper input, 
+.input-wrapper select, 
+.input-wrapper textarea {
+    border: none !important; 
+    background: transparent !important; 
+    padding: 14px 0 !important; 
+    flex: 1 !important; 
+    width: 0 !important; /* Allow flex to take over */
+    min-width: 0 !important;
+    font-weight: 600 !important; 
+    color: #0f172a !important; 
+    outline: none !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+}
+
+.input-wrapper select {
+    cursor: pointer;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+}
+
+.input-wrapper textarea {
+    min-height: 100px;
+    resize: none;
+}
+
+.luxury-file-input { 
+    border-radius: 14px; 
+    border: 2px solid #f1f5f9; 
+    padding: 12px; 
+    font-size: 0.85rem; 
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.btn-luxury-secondary { 
+    background: #f1f5f9 !important; 
+    color: #475569 !important; 
+    border: none !important; 
+    padding: 14px 24px !important; 
+    border-radius: 16px !important; 
+    font-weight: 700 !important; 
+    text-transform: uppercase !important; 
+    letter-spacing: 0.05em !important; 
+    font-size: 0.8rem !important;
+    transition: all 0.2s !important;
+}
+
+.btn-luxury-secondary:hover { background: #e2e8f0 !important; color: #1e293b !important; }
+
+/* Custom Select Arrow for Luxury Input */
+.input-wrapper select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0 center !important;
+    background-size: 16px 12px !important;
+    padding-right: 24px !important;
+}
+
+.premium-search-box {
+    background: #ffffff;
+    border: 1.5px solid #f1f5f9;
+    transition: all 0.3s;
+}
+.premium-search-box:focus-within {
+    border-color: #111827;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+}
+
+.icon-box {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+}
+
+.icon-box-sm {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+}
+
+.bg-primary-gradient { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.bg-success-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.bg-info-gradient { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+.bg-gold-gradient { background: var(--gold-gradient); }
+
+/* iziToast Luxury Overrides */
+.iziToast.iziToast-theme-dark {
+    background: #111827 !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    padding: 10px !important;
+}
+
+.iziToast-title {
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-size: 13px !important;
+}
+
+.iziToast-message {
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    opacity: 0.7 !important;
+    font-size: 14px !important;
+}
+
+.iziToast-icon {
+    font-size: 22px !important;
+    margin-right: 15px !important;
+}
+
+.iziToast-buttons {
+    margin-top: 15px !important;
+    display: flex !important;
+    gap: 8px !important;
+}
+
+.iziToast-buttons button {
+    border-radius: 50px !important;
+    padding: 8px 20px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 11px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* LUXURY AJAX TRANSITIONS */
+.ajax-row-removing {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.iziToast-wrapper {
+    z-index: 20000 !important;
 }

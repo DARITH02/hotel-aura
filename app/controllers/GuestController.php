@@ -16,10 +16,13 @@ class GuestController extends Controller {
             $guests = $this->guestModel->getAllGuests();
         }
 
+        $stats = $this->guestModel->getGuestStats();
+
         $this->view('guests/index', [
             'title' => __('manage_guests'),
             'guests' => $guests,
-            'search' => $search
+            'search' => $search,
+            'stats' => $stats
         ]);
     }
 
@@ -90,13 +93,39 @@ class GuestController extends Controller {
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
         
         if (isset($_GET['id'])) {
-            $this->guestModel->delete($_GET['id']);
-            if ($isAjax) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => 'Guest deleted successfully.']);
-                exit;
+            $id = $_GET['id'];
+
+            // Check if guest has any bookings before deleting
+            $bookingCount = $this->guestModel->countBookings($id);
+            if ($bookingCount > 0) {
+                $msg = "Cannot delete guest: they have {$bookingCount} booking(s) on record. Cancel or delete the bookings first.";
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $msg]);
+                    exit;
+                }
+                $_SESSION['error_msg'] = $msg;
+                $this->redirect('guests');
+                return;
             }
-            $_SESSION['success_msg'] = "Guest deleted successfully.";
+
+            try {
+                $this->guestModel->delete($id);
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'message' => 'Guest deleted successfully.']);
+                    exit;
+                }
+                $_SESSION['success_msg'] = "Guest deleted successfully.";
+            } catch (Exception $e) {
+                $msg = 'Cannot delete guest: they are linked to existing records.';
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $msg]);
+                    exit;
+                }
+                $_SESSION['error_msg'] = $msg;
+            }
         } else {
             if ($isAjax) {
                 header('Content-Type: application/json');

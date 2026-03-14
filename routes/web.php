@@ -15,6 +15,7 @@ $routes = [
     'make-reservation/submit' => ['HomeController', 'submitReservation'],
     'dashboard' => ['DashboardController', 'index'],
     'telegram/webhook' => ['TelegramController', 'webhook'],
+    'telegram/setup-webhook' => ['TelegramController', 'setupWebhook'],
 
     'login' => ['AuthController', 'login'],
     'login/post' => ['AuthController', 'postLogin'],

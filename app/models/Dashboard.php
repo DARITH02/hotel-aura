@@ -6,6 +6,7 @@ class Dashboard extends Model {
             'total_guests' => 0,
             'active_bookings' => 0,
             'available_rooms' => 0,
+            'total_rooms' => 0,
             'today_revenue' => 0
         ];
 
@@ -14,6 +15,9 @@ class Dashboard extends Model {
 
         // Active Bookings (checked in or confirmed)
         $stats['active_bookings'] = $this->db->query("SELECT COUNT(*) FROM bookings WHERE status IN ('confirmed', 'checked_in')")->fetchColumn();
+
+        // Total Rooms
+        $stats['total_rooms'] = $this->db->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
 
         // Available Rooms
         $stats['available_rooms'] = $this->db->query("SELECT COUNT(*) FROM rooms WHERE status = 'available'")->fetchColumn();

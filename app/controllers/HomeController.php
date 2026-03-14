@@ -129,9 +129,16 @@ class HomeController extends Controller {
                 exit;
             }
 
-            // 3. Calculate Price
+            // 3. Calculate Price Correctly based on nights
             $type = $roomTypeModel->getTypeById($room_type_id);
-            $total_price = $type['price']; // Base price (could add night multiplier if needed)
+            $checkInDate = new DateTime($check_in);
+            $checkOutDate = new DateTime($check_out);
+            $interval = $checkInDate->diff($checkOutDate);
+            $nights = $interval->days > 0 ? $interval->days : 1;
+            
+            $basePrice = $type['price'] * $nights;
+            $serviceFee = $basePrice * 0.1;
+            $total_price = $basePrice + $serviceFee;
 
             // 4. Create Booking
             $data = [
@@ -140,7 +147,8 @@ class HomeController extends Controller {
                 'check_in' => $check_in,
                 'check_out' => $check_out,
                 'total_price' => $total_price,
-                'status' => 'pending'
+                'status' => 'pending',
+                'online_book' => 1 // Website booking
             ];
 
             if ($bookingModel->create($data)) {
@@ -149,8 +157,7 @@ class HomeController extends Controller {
                 $roomModel->update($room['id'], $room);
 
                 // 5. Telegram Notification
-                $botToken = "8642404952:AAFN6fsTjticiS0HcW4djWrQj5DOuT2-OFw"; 
-                $chatId = "8642404952"; 
+                $adminChatId = "8776827027"; // Corrected Administrative ID
                 
                 $cleanPhone = str_replace(['+', ' ', '-'], '', $phone);
                 $message = "🛎 *New Booking Request*\n\n";
@@ -163,10 +170,9 @@ class HomeController extends Controller {
                 if ($description) $message .= "*Note:* " . $description . "\n\n";
                 
                 $message .= "💬 [Chat with Guest](https://t.me/+" . $cleanPhone . ")\n";
-                $message .= "🏨 [Confirm in Dashboard](" . BASE_URL . "/bookings)";
+                $message .= "🏨 [Confirm in Dashboard](" . FULL_BASE_URL . "/bookings)";
 
-                $url = "https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $chatId . "&text=" . urlencode($message) . "&parse_mode=Markdown";
-                @file_get_contents($url);
+                $this->sendTelegramMessage($adminChatId, $message);
 
                 header('Content-Type: application/json');
                 echo json_encode([

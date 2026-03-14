@@ -99,7 +99,8 @@
                     </div>
                     
                     <div class="d-grid gap-2 mt-5">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow" id="submitBtn" disabled>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow d-flex align-items-center justify-content-center gap-2" id="submitBtn" disabled>
+                            <i class="bi bi-calendar-check-fill"></i>
                             <?= __('confirm_booking') ?>
                         </button>
                     </div>

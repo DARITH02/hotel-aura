@@ -5,20 +5,49 @@ document.addEventListener('DOMContentLoaded', () => {
             message: message,
             position: 'topRight',
             timeout: timeout,
-            transitionIn: 'flipInX',
+            transitionIn: 'fadeInUp',
             transitionOut: 'fadeOut',
-            progressBarColor: 'rgba(255,255,255,0.5)',
-            displayMode: 2
+            progressBarColor: 'rgba(255,255,255,0.2)',
+            displayMode: 2,
+            layout: 2,
+            balloon: false,
+            close: true,
+            theme: 'dark',
+            messageSize: '16',
+            messageColor: '#ffffff',
+            titleColor: '#ffffff',
+            iconColor: '#ffffff',
+            maxWidth: 400
         };
 
         if (type === 'success') {
-            iziToast.success({ ...config, title: window.Translations.success || 'Success', backgroundColor: '#10b981' });
+            iziToast.success({ 
+                ...config, 
+                title: window.Translations.success || 'Success', 
+                backgroundColor: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                icon: false
+            });
         } else if (type === 'error' || type === 'danger') {
-            iziToast.error({ ...config, title: window.Translations.error || 'Error', backgroundColor: '#ef4444' });
+            iziToast.error({ 
+                ...config, 
+                title: window.Translations.error || 'Error', 
+                backgroundColor: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                icon: false
+            });
         } else if (type === 'warning') {
-            iziToast.warning({ ...config, title: 'Warning', backgroundColor: '#f59e0b' });
+            iziToast.warning({ 
+                ...config, 
+                title: 'Warning', 
+                backgroundColor: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                icon: false
+            });
         } else {
-            iziToast.info({ ...config, title: 'Notice' });
+            iziToast.info({ 
+                ...config, 
+                title: 'Notice',
+                backgroundColor: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                icon: false
+            });
         }
     };
 
@@ -27,24 +56,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Premium Confirm Dialog ---
     window.confirmAction = function(message, cb) {
         iziToast.question({
-            timeout: 20000,
+            timeout: false,
             close: false,
             overlay: true,
             displayMode: 'once',
             id: 'question',
-            zindex: 9999,
-            title: 'Confirm',
+            zindex: 10001,
+            title: window.Translations.confirm_title || 'Confirmation',
             message: message,
             position: 'center',
+            backgroundColor: '#111827',
+            titleColor: '#ffffff',
+            messageColor: 'rgba(255,255,255,0.7)',
+            icon: false,
+            maxWidth: 500,
+            layout: 2, // Modern layout
+            drag: false,
             buttons: [
-                ['<button><b>YES</b></button>', function (instance, toast) {
+                ['<button class="izi-btn-confirm"><b>' + (window.Translations.yes_confirm || 'YES') + '</b></button>', function (instance, toast) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                     if (cb) cb();
                 }, true],
-                ['<button>NO</button>', function (instance, toast) {
+                ['<button class="izi-btn-cancel">' + (window.Translations.cancel || 'CANCEL') + '</button>', function (instance, toast) {
                     instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                 }],
-            ]
+            ],
+            onOpening: function(instance, toast){
+                const confirmBtn = toast.querySelector('.izi-btn-confirm');
+                const cancelBtn = toast.querySelector('.izi-btn-cancel');
+                if(confirmBtn) {
+                    confirmBtn.style.background = 'linear-gradient(135deg, #c5a059 0%, #a88746 100%)';
+                    confirmBtn.style.color = 'white';
+                    confirmBtn.style.padding = '10px 24px';
+                    confirmBtn.style.borderRadius = '50px';
+                    confirmBtn.style.border = 'none';
+                    confirmBtn.style.margin = '5px';
+                    confirmBtn.style.fontWeight = '800';
+                    confirmBtn.style.fontSize = '12px';
+                }
+                if(cancelBtn) {
+                    cancelBtn.style.background = 'rgba(255,255,255,0.05)';
+                    cancelBtn.style.color = 'rgba(255,255,255,0.6)';
+                    cancelBtn.style.padding = '10px 24px';
+                    cancelBtn.style.border = '1px solid rgba(255,255,255,0.1)';
+                    cancelBtn.style.borderRadius = '50px';
+                    cancelBtn.style.margin = '5px';
+                    cancelBtn.style.fontSize = '12px';
+                }
+            }
         });
     };
 
@@ -53,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!btn) return;
         btn.dataset.originalHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> ${window.Translations.saving || 'Saving...'}`;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> ${window.Translations.saving || 'Processing...'}`;
     };
 
     const hideLoading = (btn) => {
@@ -69,11 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         e.preventDefault();
         const url = btn.href;
-        const isDangerous = btn.classList.contains('text-danger') || url.includes('cancel') || url.includes('delete');
+        const rowId = btn.dataset.rowId;
+        const isDangerous = btn.classList.contains('text-danger') || btn.classList.contains('ajax-delete') || url.includes('cancel') || url.includes('delete');
         
         const execute = async () => {
             const originalContent = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>`;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+            btn.classList.add('disabled');
             btn.style.pointerEvents = 'none';
 
             try {
@@ -81,23 +142,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const data = await response.json();
+                
                 if (data.success) {
                     window.showAlert(data.message, 'success');
-                    if (data.reload !== false) setTimeout(() => window.location.reload(), 1000);
+                    
+                    // Handle Row Removal (Graceful disappearance)
+                    if (rowId || btn.dataset.rowId) {
+                        const targetRow = document.getElementById(rowId || btn.dataset.rowId);
+                        if (targetRow) {
+                            targetRow.classList.add('ajax-row-removing');
+                            setTimeout(() => {
+                                targetRow.remove();
+                                // Check if table is empty to show empty state
+                                const tbody = targetRow.closest('tbody');
+                                if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                                    window.location.reload(); 
+                                }
+                            }, 500);
+                        } else if (data.reload !== false) {
+                            setTimeout(() => window.location.reload(), 1000);
+                        }
+                    } else if (data.reload !== false) {
+                        setTimeout(() => window.location.reload(), 800);
+                    }
                 } else {
-                    window.showAlert(data.message || 'Action failed', 'error');
+                    window.showAlert(data.message || (window.Translations.action_failed || 'Action failed'), 'error');
                     btn.innerHTML = originalContent;
+                    btn.classList.remove('disabled');
                     btn.style.pointerEvents = 'auto';
                 }
             } catch (error) {
-                window.showAlert('Network or server error', 'error');
+                window.showAlert(window.Translations.network_error || 'Network or server error', 'error');
                 btn.innerHTML = originalContent;
+                btn.classList.remove('disabled');
                 btn.style.pointerEvents = 'auto';
             }
         };
 
         if (isDangerous) {
-            window.confirmAction(window.Translations.confirm_message || 'Are you sure?', execute);
+            window.confirmAction(window.Translations.confirm_message || 'Are you sure you want to proceed?', execute);
         } else {
             execute();
         }
@@ -126,13 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (modal) setTimeout(() => modal.hide(), 500);
                     }
                     if (data.reload !== false) {
-                        setTimeout(() => window.location.reload(), 1500);
+                        setTimeout(() => window.location.reload(), 1000);
                     }
                 } else {
-                    window.showAlert(data.message || 'Action failed', 'error');
+                    window.showAlert(data.message || (window.Translations.action_failed || 'Action failed'), 'error');
                 }
             } catch (error) {
-                window.showAlert('Network or server error', 'error');
+                window.showAlert(window.Translations.network_error || 'Network or server error', 'error');
             } finally {
                 hideLoading(submitBtn);
             }

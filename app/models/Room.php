@@ -16,7 +16,7 @@ class Room extends Model {
     }
     
     public function getRoomById($id) {
-        $stmt = $this->db->prepare("SELECT r.*, rt.name as type_name, rt.price, rt.capacity,
+        $stmt = $this->db->prepare("SELECT r.*, f.floor_number, rt.name as type_name, rt.price, rt.capacity,
                   (SELECT g.name FROM bookings b JOIN guests g ON b.guest_id = g.id 
                    WHERE b.room_id = r.id AND b.status IN ('pending', 'confirmed', 'checked_in', 'occupied') 
                    ORDER BY b.created_at DESC LIMIT 1) as current_guest,
@@ -27,6 +27,7 @@ class Room extends Model {
                    WHERE b.room_id = r.id AND b.status IN ('pending', 'confirmed', 'checked_in', 'occupied') 
                    ORDER BY b.created_at DESC LIMIT 1) as current_booking_status
                   FROM rooms r 
+                  JOIN floors f ON r.floor_id = f.id
                   JOIN room_types rt ON r.room_type_id = rt.id
                   WHERE r.id = ?");
         $stmt->execute([$id]);

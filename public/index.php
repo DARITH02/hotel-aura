@@ -31,6 +31,11 @@ $scriptName = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 if ($scriptName === '/' || $scriptName === '\\') $scriptName = '';
 define('BASE_URL', $scriptName);
 
+// Detect Full URL for external services (Telegram, etc.)
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443 || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST']; 
+define('FULL_BASE_URL', $protocol . $host . BASE_URL);
+
 // Autoloader for Controllers and Models
 spl_autoload_register(function ($className) {
     if (file_exists(APP_DIR . DS . 'controllers' . DS . $className . '.php')) {

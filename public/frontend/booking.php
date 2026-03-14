@@ -404,6 +404,12 @@
                             <i class="bi bi-shield-lock-fill fs-5"></i>
                             <?= __('confirm_reservation_request') ?>
                         </button>
+                        
+                        <div class="text-center mt-3">
+                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-2 px-3 d-inline-flex align-items-center gap-2" style="font-size: 0.8rem; font-weight: 600;">
+                                <i class="bi bi-globe"></i> <?= __('online_reservation_system') ?>
+                            </span>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -485,7 +491,7 @@
                         </ul>
                     </div>
 
-                    <a href="https://t.me/aura_hotel_bot" target="_blank" class="luxury-btn text-decoration-none d-block w-100 mb-3" style="background: #0088cc;">
+                    <a href="https://t.me/aura_hotel_bot" id="telegramConfirmBtn" target="_blank" class="luxury-btn text-decoration-none d-block w-100 mb-3" style="background: #0088cc;">
                         <i class="bi bi-telegram me-2"></i> <?= __('open_telegram_confirm') ?>
                     </a>
                     <button type="button" class="btn btn-link link-secondary text-decoration-none border-0 fw-bold" data-bs-dismiss="modal">Close</button>
@@ -590,6 +596,12 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Update Telegram link with guest ID
+                        const tgBtn = document.getElementById('telegramConfirmBtn');
+                        if (tgBtn && data.guestId) {
+                            tgBtn.href = `https://t.me/aura_hotel_bot?start=${data.guestId}`;
+                        }
+                        
                         const modal = new bootstrap.Modal(document.getElementById('successModal'));
                         modal.show();
                         this.reset();

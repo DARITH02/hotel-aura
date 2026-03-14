@@ -13,9 +13,28 @@ class BookingController extends Controller {
 
     public function index() {
         $bookings = $this->bookingModel->getAllBookingsWithDetails();
+        
+        // Calculate Statistics
+        $totalBookings = count($bookings);
+        $totalNights = 0;
+        $totalRevenue = 0;
+        
+        foreach ($bookings as $booking) {
+            $checkIn = new DateTime($booking['check_in']);
+            $checkOut = new DateTime($booking['check_out']);
+            $nights = $checkIn->diff($checkOut)->days;
+            $totalNights += $nights;
+            $totalRevenue += $booking['total_price'];
+        }
+
         $this->view('bookings/index', [
             'title' => __('manage_bookings'),
-            'bookings' => $bookings
+            'bookings' => $bookings,
+            'stats' => [
+                'total_bookings' => $totalBookings,
+                'total_nights' => $totalNights,
+                'total_revenue' => $totalRevenue
+            ]
         ]);
     }
 
@@ -64,7 +83,8 @@ class BookingController extends Controller {
                 'check_in' => $_POST['check_in'],
                 'check_out' => $_POST['check_out'],
                 'total_price' => floatval($_POST['total_price']),
-                'status' => 'pending' // default for new bookings via admin
+                'status' => 'pending', // default for new bookings via admin
+                'online_book' => 0 // Manual booking from admin
             ];
 
             if ($this->bookingModel->create($data)) {
@@ -171,16 +191,34 @@ class BookingController extends Controller {
         if ($id) {
             $booking = $this->bookingModel->getBookingById($id);
             if ($booking) {
-                // Update booking
+                // 1. Check if balance is cleared before checkout
+                $paymentModel = new Payment();
+                $payments = $paymentModel->getPaymentsByBooking($id);
+                $totalPaid = array_sum(array_column($payments, 'amount'));
+                $balance = $booking['total_price'] - $totalPaid;
+
+                if ($balance > 0.01) { // Allowance for minor float precision
+                    if ($isAjax) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => false, 'message' => __('msg_payment_required') . " (Balance: $" . number_format($balance, 2) . ")"]);
+                        exit;
+                    }
+                    $_SESSION['error_msg'] = __('msg_payment_required');
+                    $this->redirect('bookings/show?id=' . $id);
+                    return;
+                }
+
+                // 2. Update booking
                 $this->bookingModel->updateStatus($id, 'checked_out');
                 
-                // Update room to available
+                // 3. Update room to available
                 $room = $this->roomModel->getRoomById($booking['room_id']);
                 $room['status'] = 'available';
                 $this->roomModel->update($room['id'], $room);
 
-                // Notify Telegram
-                $this->notifyTelegram($booking, 'checked_out');
+                // 4. Load detailed booking for notification
+                $updatedBooking = $this->bookingModel->getBookingById($id);
+                $this->notifyTelegram($updatedBooking, 'checked_out');
                 
                 if ($isAjax) {
                     header('Content-Type: application/json');
@@ -243,7 +281,7 @@ class BookingController extends Controller {
 
         // Configuration
         $botToken = "8642404952:AAFN6fsTjticiS0HcW4djWrQj5DOuT2-OFw";
-        $adminChatId = "8642404952"; // Hotel Admin/Channel
+        $adminChatId = "8776827027"; // Hotel Admin/Channel (Fixed from logs)
         
         // Fetch Payment Summary for this booking
         $paymentModel = new Payment();
@@ -280,10 +318,9 @@ class BookingController extends Controller {
         $cleanPhone = str_replace(['+', ' ', '-'], '', $booking['guest_phone']);
         $adminMsg .= "💬 [" . __('tg_chat_with_guest') . " / " . __('tg_chat_with_guest') . "](https://t.me/+" . $cleanPhone . ")";
 
-        // 1. Notify Admin
-        $adminUrl = "https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $adminChatId . "&text=" . urlencode($adminMsg) . "&parse_mode=Markdown";
-        @file_get_contents($adminUrl);
-
+        // 1. Notify Admin (REPLACE THIS ID WITH YOUR OWN ID FROM @userinfobot)
+        $this->sendTelegramMessage($adminChatId, $adminMsg);
+        
         // 2. Notify Guest if they have linked their Telegram
         if (!empty($booking['telegram_chat_id'])) {
             $guestMsg = "Hello " . $booking['guest_name'] . "! 👋\n";
@@ -298,8 +335,7 @@ class BookingController extends Controller {
             
             $guestMsg .= "Thank you for choosing AURA / សូមអរគុណ!";
 
-            $guestUrl = "https://api.telegram.org/bot" . $botToken . "/sendMessage?chat_id=" . $booking['telegram_chat_id'] . "&text=" . urlencode($guestMsg) . "&parse_mode=Markdown";
-            @file_get_contents($guestUrl);
+            $this->sendTelegramMessage($booking['telegram_chat_id'], $guestMsg);
         }
     }
 }

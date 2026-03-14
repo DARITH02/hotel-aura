@@ -1,10 +1,12 @@
 <?php
 class Booking extends Model {
     public function getAllBookingsWithDetails() {
-        $query = "SELECT b.*, g.name as guest_name, g.phone as guest_phone, g.telegram_chat_id, r.room_number 
+        $query = "SELECT b.*, g.name as guest_name, g.phone as guest_phone, g.telegram_chat_id, 
+                         r.room_number, rt.price as nightly_price
                   FROM bookings b 
                   JOIN guests g ON b.guest_id = g.id 
                   JOIN rooms r ON b.room_id = r.id 
+                  JOIN room_types rt ON r.room_type_id = rt.id
                   ORDER BY b.created_at DESC";
         return $this->db->query($query)->fetchAll();
     }
@@ -23,8 +25,16 @@ class Booking extends Model {
     }
 
     public function create($data) {
-        $stmt = $this->db->prepare("INSERT INTO bookings (guest_id, room_id, check_in, check_out, total_price, status) VALUES (?, ?, ?, ?, ?, ?)");
-        return $stmt->execute([$data['guest_id'], $data['room_id'], $data['check_in'], $data['check_out'], $data['total_price'], $data['status']]);
+        $stmt = $this->db->prepare("INSERT INTO bookings (guest_id, room_id, check_in, check_out, total_price, status, online_book) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        return $stmt->execute([
+            $data['guest_id'], 
+            $data['room_id'], 
+            $data['check_in'], 
+            $data['check_out'], 
+            $data['total_price'], 
+            $data['status'],
+            $data['online_book'] ?? 1
+        ]);
     }
 
     public function updateStatus($id, $status) {
