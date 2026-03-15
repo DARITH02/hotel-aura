@@ -47,6 +47,12 @@ class RoomType extends Model {
         return $stmt->fetch();
     }
 
+    public function countRoomsUsingType($id) {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM rooms WHERE room_type_id = :id");
+        $stmt->execute([':id' => $id]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function deleteType($id) {
         $stmt = $this->db->prepare("DELETE FROM room_types WHERE id = :id");
         return $stmt->execute([':id' => $id]);

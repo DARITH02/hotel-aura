@@ -159,25 +159,49 @@ class RoomTypeController extends Controller {
     }
 
     public function delete() {
+        $this->checkSuperAdmin();
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
         if (isset($_GET['id'])) {
-            // Delete old gallery images
-            $galleryImages = $this->roomTypeModel->getGalleryImages($_GET['id']);
-            foreach ($galleryImages as $galImg) {
-                $galPath = APP_DIR . '/../public/uploads/room_types/' . $galImg['image'];
-                if (file_exists($galPath)) {
-                    unlink($galPath);
+            $id = $_GET['id'];
+            
+            // Check if there are rooms using this type
+            if ($this->roomTypeModel->countRoomsUsingType($id) > 0) {
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Cannot delete room type: It is being used by one or more rooms.']);
+                    exit;
                 }
+                $_SESSION['error_msg'] = "Cannot delete room type: It is being used by one or more rooms.";
+                $this->redirect('room-types');
+                return;
             }
 
-            $this->roomTypeModel->deleteType($_GET['id']);
-            if ($isAjax) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => 'Room Type deleted successfully.']);
-                exit;
+            try {
+                // Delete old gallery images
+                $galleryImages = $this->roomTypeModel->getGalleryImages($id);
+                foreach ($galleryImages as $galImg) {
+                    $galPath = APP_DIR . '/../public/uploads/room_types/' . $galImg['image'];
+                    if (file_exists($galPath)) {
+                        unlink($galPath);
+                    }
+                }
+
+                $this->roomTypeModel->deleteType($id);
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'message' => 'Room Type deleted successfully.']);
+                    exit;
+                }
+                $_SESSION['success_msg'] = "Room Type deleted successfully.";
+            } catch (Exception $e) {
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+                    exit;
+                }
+                $_SESSION['error_msg'] = "Database error: Cannot delete this item. It might be referenced by other records.";
             }
-            $_SESSION['success_msg'] = "Room Type deleted successfully.";
         } else {
             if ($isAjax) {
                 header('Content-Type: application/json');
@@ -189,6 +213,7 @@ class RoomTypeController extends Controller {
     }
 
     public function deleteGalleryImage() {
+        $this->checkSuperAdmin();
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
         
         if (isset($_GET['id'])) {
@@ -212,6 +237,7 @@ class RoomTypeController extends Controller {
         $this->redirect('room-types');
     }
     public function deletePrimaryImage() {
+        $this->checkSuperAdmin();
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
         
         if (isset($_GET['id'])) {

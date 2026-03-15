@@ -32,7 +32,8 @@ class GuestController extends Controller {
                 'name' => trim($_POST['name'] ?? ''),
                 'email' => trim($_POST['email'] ?? ''),
                 'phone' => trim($_POST['phone'] ?? ''),
-                'address' => trim($_POST['address'] ?? '')
+                'address' => trim($_POST['address'] ?? ''),
+                'online_book' => 0
             ];
 
             $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
@@ -60,12 +61,18 @@ class GuestController extends Controller {
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? '';
-            $data = [
-                'name' => trim($_POST['name'] ?? ''),
-                'email' => trim($_POST['email'] ?? ''),
-                'phone' => trim($_POST['phone'] ?? ''),
-                'address' => trim($_POST['address'] ?? '')
-            ];
+            if ($id) {
+                $guest = $this->guestModel->getGuestById($id);
+                $data = [
+                    'name' => trim($_POST['name'] ?? ''),
+                    'email' => trim($_POST['email'] ?? ''),
+                    'phone' => trim($_POST['phone'] ?? ''),
+                    'address' => trim($_POST['address'] ?? ''),
+                    'online_book' => $guest['online_book'] ?? 0
+                ];
+            } else {
+                $data = [];
+            }
 
             $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
@@ -90,6 +97,7 @@ class GuestController extends Controller {
     }
 
     public function delete() {
+        $this->checkSuperAdmin();
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
         
         if (isset($_GET['id'])) {

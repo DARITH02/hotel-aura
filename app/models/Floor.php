@@ -21,6 +21,12 @@ class Floor extends Model {
         ]);
     }
 
+    public function countRooms($id) {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM rooms WHERE floor_id = :id");
+        $stmt->execute([':id' => $id]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function deleteFloor($id) {
         $stmt = $this->db->prepare("DELETE FROM floors WHERE id = :id");
         return $stmt->execute([':id' => $id]);

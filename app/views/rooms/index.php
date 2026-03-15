@@ -184,7 +184,9 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2">
                                                 <li><a class="dropdown-item py-2 px-3 rounded-3 text-dark fw-bold d-flex align-items-center gap-2" href="<?= BASE_URL ?>/rooms/edit?id=<?= $room['id'] ?>"><i class="bi bi-pencil-square text-primary"></i><?= __('edit') ?></a></li>
+                                                <?php if (($_SESSION['admin_role'] ?? '') === 'super_admin'): ?>
                                                 <li><a class="dropdown-item py-2 px-3 rounded-3 text-danger fw-bold d-flex align-items-center gap-2 ajax-delete" href="<?= BASE_URL ?>/rooms/delete?id=<?= $room['id'] ?>" data-row-id="row-<?= $room['id'] ?>"><i class="bi bi-trash3-fill"></i><?= __('delete') ?></a></li>
+                                                <?php endif; ?>
                                             </ul>
                                         </div>
                                     </td>

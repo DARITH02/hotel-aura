@@ -38,7 +38,19 @@ class Booking extends Model {
     }
 
     public function updateStatus($id, $status) {
-        $stmt = $this->db->prepare("UPDATE bookings SET status = ? WHERE id = ?");
-        return $stmt->execute([$status, $id]);
+        $sql = "UPDATE bookings SET status = ?";
+        $params = [$status];
+
+        if ($status === 'occupied') {
+            $sql .= ", actual_check_in = NOW()";
+        } elseif ($status === 'checked_out') {
+            $sql .= ", actual_check_out = NOW()";
+        }
+
+        $sql .= " WHERE id = ?";
+        $params[] = $id;
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
 }

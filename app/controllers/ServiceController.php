@@ -131,6 +131,7 @@ class ServiceController extends Controller {
     }
 
     public function delete() {
+        $this->checkSuperAdmin();
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
         if (isset($_GET['id'])) {

@@ -35,6 +35,8 @@ return [
     'maintenance' => 'Maintenance',
     'check_in' => 'Check In',
     'check_out' => 'Check Out',
+    'actual_check_in' => 'Actual Check In',
+    'actual_check_out' => 'Actual Check Out',
     'total_price' => 'Total Price',
     'total_rooms' => 'Total Rooms',
     'occupied_rooms' => 'Occupied Rooms',

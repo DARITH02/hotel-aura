@@ -106,7 +106,8 @@ class HomeController extends Controller {
                     'name' => $name,
                     'phone' => $phone,
                     'email' => $email,
-                    'address' => 'AURA Website Reservation'
+                    'address' => 'AURA Website Reservation',
+                    'online_book' => 1
                 ]);
                 // Use the database connection from the model to get the last ID
                 $guest_id = $guestModel->getLastId();
@@ -117,7 +118,8 @@ class HomeController extends Controller {
                     'name' => $name,
                     'phone' => $phone,
                     'email' => $email,
-                    'address' => $existingGuests[0]['address'] ?? 'Website'
+                    'address' => $existingGuests[0]['address'] ?? 'Website',
+                    'online_book' => 1
                 ]);
             }
 

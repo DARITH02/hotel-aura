@@ -71,16 +71,40 @@ class FloorController extends Controller {
     }
 
     public function delete() {
+        $this->checkSuperAdmin();
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
         if (isset($_GET['id'])) {
-            $this->floorModel->deleteFloor($_GET['id']);
-            if ($isAjax) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'message' => 'Floor deleted successfully.']);
-                exit;
+            $id = $_GET['id'];
+            
+            // Check if there are rooms on this floor
+            if ($this->floorModel->countRooms($id) > 0) {
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Cannot delete floor: It still has rooms. Move or delete rooms first.']);
+                    exit;
+                }
+                $_SESSION['error_msg'] = "Cannot delete floor: It still has rooms. Move or delete rooms first.";
+                $this->redirect('floors');
+                return;
             }
-            $_SESSION['success_msg'] = "Floor deleted successfully.";
+
+            try {
+                $this->floorModel->deleteFloor($id);
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'message' => 'Floor deleted successfully.']);
+                    exit;
+                }
+                $_SESSION['success_msg'] = "Floor deleted successfully.";
+            } catch (Exception $e) {
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+                    exit;
+                }
+                $_SESSION['error_msg'] = "Database error: Cannot delete this floor. It might be referenced by other records.";
+            }
         } else {
             if ($isAjax) {
                 header('Content-Type: application/json');

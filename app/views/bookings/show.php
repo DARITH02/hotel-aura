@@ -127,11 +127,18 @@
                 <div class="card-body px-4 pb-5 pt-0">
                     <div class="row g-0 stay-timeline justify-content-between align-items-center position-relative my-4">
                         <div class="col-md-5 text-center px-4">
-                            <div class="timeline-point check-in-point animate__animated animate__pulse animate__infinite">
+                            <div class="timeline-point check-in-point <?= ($booking['status'] == 'occupied' || $booking['actual_check_in']) ? 'animate__animated animate__pulse animate__infinite border-success' : '' ?>">
                                 <div class="date-number"><?= date('d', strtotime($booking['check_in'])) ?></div>
                                 <div class="date-month text-uppercase fw-bold opacity-75"><?= date('M Y', strtotime($booking['check_in'])) ?></div>
                                 <div class="badge bg-success bg-opacity-10 text-success mt-2 rounded-pill px-3"><?= __('check_in') ?></div>
-                                <div class="small fw-bold text-muted mt-2"><i class="bi bi-clock"></i> 14:00</div>
+                                <div class="small fw-bold text-muted mt-2">
+                                    <i class="bi bi-clock"></i> 14:00
+                                    <?php if ($booking['actual_check_in']): ?>
+                                        <div class="mt-1 text-success border-top pt-1">
+                                            <i class="bi bi-check2-circle"></i> <?= date('H:i', strtotime($booking['actual_check_in'])) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-2 d-none d-md-flex justify-content-center">
@@ -140,11 +147,18 @@
                             </div>
                         </div>
                         <div class="col-md-5 text-center px-4">
-                            <div class="timeline-point check-out-point">
+                            <div class="timeline-point check-out-point <?= ($booking['status'] == 'checked_out' || $booking['actual_check_out']) ? 'border-danger' : '' ?>">
                                 <div class="date-number"><?= date('d', strtotime($booking['check_out'])) ?></div>
                                 <div class="date-month text-uppercase fw-bold opacity-75"><?= date('M Y', strtotime($booking['check_out'])) ?></div>
                                 <div class="badge bg-danger bg-opacity-10 text-danger mt-2 rounded-pill px-3"><?= __('check_out') ?></div>
-                                <div class="small fw-bold text-muted mt-2"><i class="bi bi-clock"></i> 11:00</div>
+                                <div class="small fw-bold text-muted mt-2">
+                                    <i class="bi bi-clock"></i> 11:00
+                                    <?php if ($booking['actual_check_out']): ?>
+                                        <div class="mt-1 text-danger border-top pt-1">
+                                            <i class="bi bi-check2-circle"></i> <?= date('H:i', strtotime($booking['actual_check_out'])) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>

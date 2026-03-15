@@ -32,6 +32,22 @@ class Controller {
         }
     }
 
+    protected function isSuperAdmin() {
+        return ($_SESSION['admin_role'] ?? '') === 'super_admin';
+    }
+
+    protected function checkSuperAdmin() {
+        if (!$this->isSuperAdmin()) {
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Permission denied. Super Admin role required.']);
+                exit;
+            }
+            $_SESSION['error_msg'] = 'Permission denied. This action requires Super Admin privileges.';
+            $this->redirect('dashboard');
+        }
+    }
+
     /**
      * Centralized Telegram Sender
      */

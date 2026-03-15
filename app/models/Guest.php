@@ -18,24 +18,26 @@ class Guest extends Model {
     }
     
     public function create($data) {
-        $stmt = $this->db->prepare("INSERT INTO guests (name, phone, email, address, telegram_chat_id) VALUES (?, ?, ?, ?, ?)");
-        return $stmt->execute([
-            $data['name'], 
-            $data['phone'], 
-            $data['email'], 
-            $data['address'] ?? '', 
-            $data['telegram_chat_id'] ?? null
-        ]);
-    }
-
-    public function update($id, $data) {
-        $stmt = $this->db->prepare("UPDATE guests SET name=?, phone=?, email=?, address=?, telegram_chat_id=? WHERE id=?");
+        $stmt = $this->db->prepare("INSERT INTO guests (name, phone, email, address, telegram_chat_id, online_book) VALUES (?, ?, ?, ?, ?, ?)");
         return $stmt->execute([
             $data['name'], 
             $data['phone'], 
             $data['email'], 
             $data['address'] ?? '', 
             $data['telegram_chat_id'] ?? null,
+            $data['online_book'] ?? 0
+        ]);
+    }
+
+    public function update($id, $data) {
+        $stmt = $this->db->prepare("UPDATE guests SET name=?, phone=?, email=?, address=?, telegram_chat_id=?, online_book=? WHERE id=?");
+        return $stmt->execute([
+            $data['name'], 
+            $data['phone'], 
+            $data['email'], 
+            $data['address'] ?? '', 
+            $data['telegram_chat_id'] ?? null,
+            $data['online_book'] ?? 0,
             $id
         ]);
     }

@@ -342,6 +342,7 @@
                 <div class="glass-card p-4 p-md-5 animate__animated animate__fadeInLeft">
                     <form id="reservationForm">
                         <h4 class="playfair fw-bold mb-4 border-bottom pb-3"><?= __('stay_details') ?></h4>
+                        <input type="hidden" name="online_book" value="1">
                         
                         <div class="row">
                             <div class="col-md-6">

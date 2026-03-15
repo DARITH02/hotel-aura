@@ -121,9 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = false;
     };
 
-    // Generic AJAX Action Handling (links with .ajax-action)
+    // Generic AJAX Action Handling (links with .ajax-action or .ajax-delete)
     document.addEventListener('click', async function(e) {
-        const btn = e.target.closest('.ajax-action');
+        const btn = e.target.closest('.ajax-action') || e.target.closest('.ajax-delete');
         if (!btn) return;
         
         e.preventDefault();
@@ -180,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (isDangerous) {
-            window.confirmAction(window.Translations.confirm_message || 'Are you sure you want to proceed?', execute);
+            const confirmMsg = btn.dataset.confirm || (window.Translations.confirm_message || 'Are you sure you want to proceed?');
+            window.confirmAction(confirmMsg, execute);
         } else {
             execute();
         }

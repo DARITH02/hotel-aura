@@ -109,8 +109,8 @@
                                             <div class="fw-extrabold text-dark mb-1 d-flex align-items-center gap-2">
                                                 <?= htmlspecialchars($booking['guest_name']) ?>
                                                 <?php if ($booking['online_book']): ?>
-                                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-10 d-flex align-items-center gap-1" style="font-size: 0.6rem; font-weight: 800;" title="Website Booking">
-                                                        <i class="bi bi-globe fs-x-small"></i>
+                                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-10 d-flex align-items-center gap-1" style="font-size: 0.6rem; font-weight: 800;" title="<?= __('online_booking') ?>">
+                                                        <i class="bi bi-globe fs-x-small"></i> <?= strtoupper(__('online')) ?>
                                                     </span>
                                                 <?php endif; ?>
                                                 <?php if (!empty($booking['telegram_chat_id'])): ?>

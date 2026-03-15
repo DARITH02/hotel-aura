@@ -35,6 +35,8 @@ return [
     'maintenance' => 'ការថែទាំ',
     'check_in' => 'ចូលស្នាក់នៅ',
     'check_out' => 'ចាកចេញ',
+    'actual_check_in' => 'ពេលវេលាចូលស្នាក់នៅជាក់ស្តែង',
+    'actual_check_out' => 'ពេលវេលាចាកចេញជាក់ស្តែង',
     'total_price' => 'តម្លៃសរុប',
     'total_rooms' => 'បន្ទប់សរុប',
     'occupied_rooms' => 'បន្ទប់មានភ្ញៀវ',

@@ -84,9 +84,11 @@
                                         <button class="btn btn-luxury-action" data-bs-toggle="modal" data-bs-target="#editRoomTypeModal<?= $type['id'] ?>" title="<?= __('edit') ?>">
                                             <i class="bi bi-pencil-square text-primary"></i>
                                         </button>
+                                        <?php if (($_SESSION['admin_role'] ?? '') === 'super_admin'): ?>
                                         <a href="<?= BASE_URL ?>/room-types/delete?id=<?= $type['id'] ?>" class="btn btn-luxury-action ajax-delete" data-row-id="row-<?= $type['id'] ?>" title="<?= __('delete') ?>">
                                             <i class="bi bi-trash3-fill text-danger"></i>
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>

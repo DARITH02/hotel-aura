@@ -110,6 +110,11 @@
                                                         <i class="bi bi-telegram fs-x-small"></i>
                                                     </span>
                                                 <?php endif; ?>
+                                                <?php if (!empty($guest['online_book'])): ?>
+                                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-10 d-flex align-items-center gap-1" style="font-size: 0.6rem; font-weight: 800;" title="<?= __('online_booking') ?>">
+                                                        <i class="bi bi-globe fs-x-small"></i> <?= strtoupper(__('online')) ?>
+                                                    </span>
+                                                <?php endif; ?>
                                             </div>
                                             <div class="x-small text-muted fw-bold text-uppercase tracking-wider">
                                                 ID: <span class="text-primary opacity-75">G-<?= str_pad($guest['id'], 3, '0', STR_PAD_LEFT) ?></span>
@@ -146,9 +151,11 @@
                                         <button class="btn btn-luxury-action" data-bs-toggle="modal" data-bs-target="#editGuestModal<?= $guest['id'] ?>">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
+                                        <?php if (($_SESSION['admin_role'] ?? '') === 'super_admin'): ?>
                                         <a href="<?= BASE_URL ?>/guests/delete?id=<?= $guest['id'] ?>" class="btn btn-luxury-action text-danger ajax-delete" data-row-id="row-<?= $guest['id'] ?>">
                                             <i class="bi bi-trash3-fill"></i>
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
