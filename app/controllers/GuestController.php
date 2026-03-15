@@ -26,6 +26,19 @@ class GuestController extends Controller {
         ]);
     }
 
+    public function edit() {
+        $id = $_GET['id'] ?? 0;
+        if (!$id) $this->redirect('guests');
+
+        $guest = $this->guestModel->getGuestById($id);
+        if (!$guest) $this->redirect('guests');
+
+        $this->view('guests/edit', [
+            'title' => __('edit') . " " . $guest['name'],
+            'guest' => $guest
+        ]);
+    }
+
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [

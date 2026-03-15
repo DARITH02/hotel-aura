@@ -64,6 +64,8 @@ $routes = [
     'bookings/check-in' => ['BookingController', 'checkIn'],
     'bookings/check-out' => ['BookingController', 'checkOut'],
     'bookings/cancel' => ['BookingController', 'cancel'],
+    'bookings/edit' => ['BookingController', 'edit'],
+    'bookings/update' => ['BookingController', 'update'],
 
     'payments' => ['PaymentController', 'index'],
     'payments/create' => ['PaymentController', 'create'],

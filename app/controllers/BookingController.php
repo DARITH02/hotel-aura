@@ -62,6 +62,81 @@ class BookingController extends Controller {
         ]);
     }
 
+    public function edit() {
+        $id = $_GET['id'] ?? 0;
+        if (!$id) $this->redirect('bookings');
+
+        $booking = $this->bookingModel->getBookingById($id);
+        if (!$booking) $this->redirect('bookings');
+
+        $guests = $this->guestModel->getAllGuests();
+        $rooms = $this->roomModel->getAllRoomsWithDetails();
+
+        $this->view('bookings/edit', [
+            'title' => __('edit') . " #$id",
+            'booking' => $booking,
+            'guests' => $guests,
+            'rooms' => $rooms
+        ]);
+    }
+
+    public function update() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'];
+            $data = [
+                'guest_id' => $_POST['guest_id'],
+                'room_id' => $_POST['room_id'],
+                'check_in' => $_POST['check_in'],
+                'check_out' => $_POST['check_out'],
+                'total_price' => floatval($_POST['total_price']),
+                'status' => $_POST['status'],
+                'actual_check_in' => !empty($_POST['actual_check_in']) ? $_POST['actual_check_in'] : null,
+                'actual_check_out' => !empty($_POST['actual_check_out']) ? $_POST['actual_check_out'] : null
+            ];
+
+            $oldBooking = $this->bookingModel->getBookingById($id);
+            
+            if ($this->bookingModel->update($id, $data)) {
+                // Handle Room Status change if room was swapped
+                if ($oldBooking['room_id'] != $data['room_id']) {
+                    // Make old room available
+                    $oldRoom = $this->roomModel->getRoomById($oldBooking['room_id']);
+                    if ($oldRoom) {
+                        $oldRoom['status'] = 'available';
+                        $this->roomModel->update($oldRoom['id'], $oldRoom);
+                    }
+                    
+                    // Make new room booked (or occupied depending on status)
+                    $newRoom = $this->roomModel->getRoomById($data['room_id']);
+                    if ($newRoom) {
+                        $newRoom['status'] = ($data['status'] == 'occupied' || $data['status'] == 'checked_in') ? 'occupied' : 'booked';
+                        $this->roomModel->update($newRoom['id'], $newRoom);
+                    }
+                } elseif ($oldBooking['status'] != $data['status']) {
+                    // Update current room status if booking status changed
+                    $room = $this->roomModel->getRoomById($data['room_id']);
+                    if ($room) {
+                        if (in_array($data['status'], ['occupied', 'checked_in'])) {
+                            $room['status'] = 'occupied';
+                        } elseif (in_array($data['status'], ['checked_out', 'cancelled'])) {
+                            $room['status'] = 'available';
+                        } else {
+                            $room['status'] = 'booked';
+                        }
+                        $this->roomModel->update($room['id'], $room);
+                    }
+                }
+
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'message' => 'Booking updated successfully', 'reload' => true]);
+                    exit;
+                }
+                $this->redirect('bookings/show?id=' . $id);
+            }
+        }
+    }
+
     public function create() {
         // Get all guests and available rooms for dropdowns
         $guests = $this->guestModel->getAllGuests();

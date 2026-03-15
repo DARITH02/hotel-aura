@@ -55,6 +55,9 @@
             <button class="btn btn-premium-outline d-flex align-items-center gap-2" onclick="window.print()">
                 <i class="bi bi-printer"></i> <?= __('print') ?? 'Print' ?>
             </button>
+            <a href="<?= BASE_URL ?>/bookings/edit?id=<?= $booking['id'] ?>" class="btn btn-premium-outline d-flex align-items-center gap-2">
+                <i class="bi bi-pencil-square"></i> <?= __('edit') ?>
+            </a>
             <?php if ($booking['status'] == 'pending'): ?>
                 <a href="<?= BASE_URL ?>/bookings/confirm?id=<?= $booking['id'] ?>" class="btn btn-primary shadow-sm px-4 ajax-action">
                     <i class="bi bi-calendar-check-fill me-1"></i> <?= __('confirm') ?>
@@ -197,10 +200,10 @@
                                 <?php endif; ?>
                             </div>
                             <div class="mt-4 pt-4 border-top border-white d-flex gap-3">
-                                <a href="<?= BASE_URL ?>/guests/edit?id=<?= $booking['guest_id'] ?>" class="btn btn-sm btn-light border rounded-pill px-3">
-                                    <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                                <a href="<?= BASE_URL ?>/guests/edit?id=<?= $booking['guest_id'] ?>" class="btn btn-sm btn-light border rounded-pill px-3 fw-bold">
+                                    <i class="bi bi-pencil-square me-1 text-primary"></i> <?= __('edit_profile') ?>
                                 </a>
-                                <a href="https://wa.me/<?= str_replace(['+',' ','-'], '', $booking['guest_phone']) ?>" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                <a href="https://wa.me/<?= str_replace(['+',' ','-'], '', $booking['guest_phone']) ?>" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
                                     <i class="bi bi-whatsapp me-1"></i> WhatsApp
                                 </a>
                             </div>

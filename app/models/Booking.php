@@ -53,4 +53,24 @@ class Booking extends Model {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
+
+    public function update($id, $data) {
+        $stmt = $this->db->prepare("
+            UPDATE bookings 
+            SET guest_id = ?, room_id = ?, check_in = ?, check_out = ?, total_price = ?, status = ?, 
+                actual_check_in = ?, actual_check_out = ?
+            WHERE id = ?
+        ");
+        return $stmt->execute([
+            $data['guest_id'],
+            $data['room_id'],
+            $data['check_in'],
+            $data['check_out'],
+            $data['total_price'],
+            $data['status'],
+            $data['actual_check_in'] ?? null,
+            $data['actual_check_out'] ?? null,
+            $id
+        ]);
+    }
 }
