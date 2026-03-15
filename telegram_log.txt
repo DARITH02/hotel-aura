@@ -1,4 +1,0 @@
-[2026-03-14 03:36:16] {"update_id":133860383,
-"message":{"message_id":21,"from":{"id":8776827027,"is_bot":false,"first_name":"Chan","last_name":"Darith","username":"darith_ph80","language_code":"en"},"chat":{"id":8776827027,"first_name":"Chan","last_name":"Darith","username":"darith_ph80","type":"private"},"date":1773455774,"text":"\u178a"}}
-[2026-03-14 03:36:36] {"update_id":133860384,
-"message":{"message_id":22,"from":{"id":8776827027,"is_bot":false,"first_name":"Chan","last_name":"Darith","username":"darith_ph80","language_code":"en"},"chat":{"id":8776827027,"first_name":"Chan","last_name":"Darith","username":"darith_ph80","type":"private"},"date":1773455794,"text":"/start","entities":[{"offset":0,"length":6,"type":"bot_command"}]}}

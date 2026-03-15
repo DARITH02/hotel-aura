@@ -26,10 +26,21 @@ function __($key) {
 }
 // --------------------------
 
+// --- Global Configuration ---
+$config = require_once ROOT_DIR . DS . 'config' . DS . 'config.php';
+
 // Automatically detect BASE_URL for routing
 $scriptName = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 if ($scriptName === '/' || $scriptName === '\\') $scriptName = '';
-define('BASE_URL', $scriptName);
+
+// Allow override from config
+$baseUrl = $config['app']['url_path'] ?? $scriptName;
+// If we are using a root .htaccess to hide /public, we might want to strip /public from BASE_URL
+if (strpos($baseUrl, '/public') !== false && !file_exists(ROOT_DIR . DS . 'index.php')) {
+    // This is a common setup on shared hosting
+    $baseUrl = str_replace('/public', '', $baseUrl);
+}
+define('BASE_URL', $baseUrl);
 
 // Detect Full URL for external services (Telegram, etc.)
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443 || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? "https://" : "http://";

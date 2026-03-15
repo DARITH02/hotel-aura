@@ -1,12 +1,17 @@
 <?php
 class Database {
-    private $host = 'localhost';
-    private $db_name = 'db_hotel';
-    private $username = 'root';
-    private $password = '';
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
     public $conn;
 
     public function __construct() {
+        $config = require __DIR__ . '/config.php';
+        $this->host = $config['db']['host'];
+        $this->db_name = $config['db']['name'];
+        $this->username = $config['db']['user'];
+        $this->password = $config['db']['pass'];
         $this->getConnection();
     }
 

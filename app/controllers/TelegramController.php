@@ -35,7 +35,8 @@ class TelegramController extends Controller {
     }
     
     public function setupWebhook() {
-        $botToken = "8642404952:AAFN6fsTjticiS0HcW4djWrQj5DOuT2-OFw";
+        $config = require ROOT_DIR . DS . 'config' . DS . 'config.php';
+        $botToken = $config['telegram']['bot_token'] ?? "";
         $webhookUrl = FULL_BASE_URL . "/telegram/webhook";
         
         $url = "https://api.telegram.org/bot" . $botToken . "/setWebhook?url=" . urlencode($webhookUrl);

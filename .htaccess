@@ -1,10 +1,21 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    RewriteEngine On
 
-# Allow access if request already starts with public/
-RewriteCond %{REQUEST_URI} ^/public/ [NC]
-RewriteRule ^(.*)$ $1 [L]
+    # Prevent loop by not rewriting if the URI already starts with /public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    
+    # Handle assets and index.php routing
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
 
-# Otherwise rewrite to public/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ public/$1 [L]
+# Security: Disable Directory Browsing
+Options -Indexes
+
+# Protect sensitive directories
+RewriteRule ^(app|config|database|routes|temp_junk)/ - [F,L]
+
+# Protect sensitive files in the root
+<FilesMatch "\.(log|env|json|md|sql)$">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
