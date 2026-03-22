@@ -32,44 +32,47 @@ class AuthController extends Controller {
             unset($_SESSION['register_error']);
         }
 
-        $adminModel = new Admin();
-        $superAdminExists = $adminModel->getSuperAdminCount() >= 1;
 
         $this->view('auth/register', [
-            'error'            => $error,
-            'superAdminExists' => $superAdminExists
+            'error'            => $error
         ]);
     }
 
     public function postRegister() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
             $name             = trim($_POST['name'] ?? '');
             $email            = trim($_POST['email'] ?? '');
             $password         = $_POST['password'] ?? '';
             $confirm_password = $_POST['confirm_password'] ?? '';
-            // Sanitize role — only allow two valid values
-            $rawRole = $_POST['role'] ?? 'admin';
-            $role    = in_array($rawRole, ['admin', 'super_admin']) ? $rawRole : 'admin';
+            $rawRole          = $_POST['role'] ?? 'admin';
+            $role             = in_array($rawRole, ['admin', 'super_admin']) ? $rawRole : 'admin';
 
+            $error = '';
             if (empty($name) || empty($email) || empty($password)) {
-                $_SESSION['register_error'] = 'Please fill out all fields.';
-                $this->redirect('register');
+                $error = 'Please fill out all fields.';
+            } elseif ($password !== $confirm_password) {
+                $error = 'Passwords do not match.';
+            } elseif ($this->adminModel->findByEmail($email)) {
+                $error = 'Email already exists.';
+            } elseif ($role === 'super_admin') {
+                $accessKey    = $_POST['access_key'] ?? '';
+                $config       = require ROOT_DIR . '/config/config.php';
+                $masterSecret = $config['auth']['master_access_key'] ?? '';
+                if ($accessKey !== $masterSecret) {
+                    $error = 'Invalid Master Access Key. Unauthorized Super Admin registration.';
+                }
             }
 
-            if ($password !== $confirm_password) {
-                $_SESSION['register_error'] = 'Passwords do not match.';
+            if ($error) {
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $error]);
+                    exit;
+                }
+                $_SESSION['register_error'] = $error;
                 $this->redirect('register');
-            }
-
-            if ($this->adminModel->findByEmail($email)) {
-                $_SESSION['register_error'] = 'Email already exists.';
-                $this->redirect('register');
-            }
-
-            // ── Enforce single super admin ──────────────────────────
-            if ($role === 'super_admin' && $this->adminModel->getSuperAdminCount() >= 1) {
-                $_SESSION['register_error'] = 'A Super Admin already exists. You can only register as Admin.';
-                $this->redirect('register');
+                return;
             }
 
             $success = $this->adminModel->create([
@@ -80,14 +83,25 @@ class AuthController extends Controller {
             ]);
 
             if ($success) {
-                // Auto-login after registration
                 $admin = $this->adminModel->findByEmail($email);
                 $_SESSION['admin_id']   = $admin['id'];
                 $_SESSION['admin_name'] = $admin['name'];
                 $_SESSION['admin_role'] = $admin['role'];
+
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => BASE_URL . '/dashboard']);
+                    exit;
+                }
                 $this->redirect('dashboard');
             } else {
-                $_SESSION['register_error'] = 'Failed to create account. Please try again.';
+                $error = 'Failed to create account. Please try again.';
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $error]);
+                    exit;
+                }
+                $_SESSION['register_error'] = $error;
                 $this->redirect('register');
             }
         } else {
@@ -97,25 +111,43 @@ class AuthController extends Controller {
 
     public function postLogin() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
 
             if (empty($email) || empty($password)) {
-                $_SESSION['login_error'] = 'Please enter both email and password.';
+                $error = 'Please enter both email and password.';
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $error]);
+                    exit;
+                }
+                $_SESSION['login_error'] = $error;
                 $this->redirect('login');
+                return;
             }
 
             $admin = $this->adminModel->findByEmail($email);
 
             if ($admin && password_verify($password, $admin['password'])) {
-                // Set session variables
                 $_SESSION['admin_id'] = $admin['id'];
                 $_SESSION['admin_name'] = $admin['name'];
                 $_SESSION['admin_role'] = $admin['role'];
                 
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'redirect' => BASE_URL . '/dashboard']);
+                    exit;
+                }
                 $this->redirect('dashboard');
             } else {
-                $_SESSION['login_error'] = 'Invalid email or password.';
+                $error = 'Invalid email or password.';
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $error]);
+                    exit;
+                }
+                $_SESSION['login_error'] = $error;
                 $this->redirect('login');
             }
         } else {

@@ -164,6 +164,10 @@
             margin-top: 24px;
             transition: 0.3s;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .btn-login:hover {
@@ -171,6 +175,20 @@
             box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.3);
             filter: brightness(1.1);
         }
+
+        .btn-login:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .password-toggle {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            padding-right: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .password-toggle:hover { color: var(--gold); }
+
+        .spinner-border { width: 1.2rem; height: 1.2rem; border-width: 0.2em; display: none; }
 
         .btn-login:active {
             transform: translateY(0);
@@ -230,12 +248,14 @@
                     <p><?= __('hotel_admin_system') ?></p>
                 </div>
 
-                <?php if (!empty($error)): ?>
-                    <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger small rounded-3 mb-4 d-flex align-items-center" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <div><?= htmlspecialchars($error) ?></div>
-                    </div>
-                <?php endif; ?>
+                <div id="alert-container">
+                    <?php if (!empty($error)): ?>
+                        <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger small rounded-3 mb-4 d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div><?= htmlspecialchars($error) ?></div>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
                 <form action="<?= BASE_URL ?>/login/post" method="POST">
                     <div class="mb-4">
@@ -250,12 +270,14 @@
                         <label class="form-label"><?= __('password') ?></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
+                            <button type="button" class="password-toggle" onclick="togglePass()"><i class="bi bi-eye-slash-fill"></i></button>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-login w-100">
-                        <?= __('login') ?>
+                    <button type="submit" class="btn btn-login w-100" id="btn-submit">
+                        <div class="spinner-border text-light" role="status" id="spinner"></div>
+                        <span id="btn-text"><?= __('login') ?></span>
                     </button>
                     
                     <div class="credentials-box">
@@ -278,5 +300,73 @@
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePass() {
+            const input = document.getElementById('password');
+            const icon = document.querySelector('.password-toggle i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+            }
+        }
+
+        const loginForm = document.querySelector('form');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnText = document.getElementById('btn-text');
+        const spinner = document.getElementById('spinner');
+        const alertContainer = document.getElementById('alert-container');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                btnSubmit.disabled = true;
+                btnText.style.opacity = '0.5';
+                spinner.style.display = 'block';
+                alertContainer.innerHTML = '';
+
+                const formData = new FormData(this);
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect || '<?= BASE_URL ?>/dashboard';
+                    } else {
+                        alertContainer.innerHTML = `
+                            <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger small rounded-3 mb-4 d-flex align-items-center" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <div>${data.message || 'Login failed.'}</div>
+                            </div>
+                        `;
+                        btnSubmit.disabled = false;
+                        btnText.style.opacity = '1';
+                        spinner.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger small rounded-3 mb-4 d-flex align-items-center" role="alert">
+                            <i class="bi bi-bug-fill me-2"></i>
+                            <div>Connection error. Please try again.</div>
+                        </div>
+                    `;
+                    btnSubmit.disabled = false;
+                    btnText.style.opacity = '1';
+                    spinner.style.display = 'none';
+                });
+            });
+        }
+    </script>
 </body>
 </html>

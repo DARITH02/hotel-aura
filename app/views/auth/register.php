@@ -76,6 +76,7 @@
             border-radius: 14px; overflow: hidden;
             display: flex; align-items: center;
             transition: all 0.3s; margin-bottom: 20px;
+            position: relative;
         }
         .auth-input-group:focus-within {
             border-color: var(--gold);
@@ -92,6 +93,22 @@
         }
         .auth-input-group input::placeholder { color: rgba(255,255,255,0.2); }
         .auth-input-group.mb-0 { margin-bottom: 0; }
+
+        .password-toggle {
+            padding: 0 16px;
+            color: rgba(255,255,255,0.25);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        .password-toggle:hover { color: var(--gold); transform: scale(1.1); }
+
+        /* Strength Indicator */
+        .strength-p-wrapper { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin: 8px 0; }
+        .strength-p-bar { height: 100%; width: 0%; transition: all 0.4s ease; border-radius: 2px; }
+        .strength-label { font-size: 0.65rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ── ROLE SELECTOR CARDS ───────────── */
         .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
@@ -156,8 +173,12 @@
             border: none; border-radius: 14px; color: white;
             font-weight: 800; font-size: 0.95rem; letter-spacing: 0.05em;
             text-transform: uppercase; cursor: pointer; transition: all 0.3s; margin-top: 4px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .btn-register:hover { transform: translateY(-2px); box-shadow: 0 20px 28px -8px rgba(245,158,11,0.35); filter: brightness(1.08); }
+        .btn-register:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .spinner-border { width: 1.1rem; height: 1.1rem; border-width: 0.15em; display: none; }
 
         .login-footer {
             margin-top: 28px; text-align: center;
@@ -187,14 +208,16 @@
                 <p><?= __('hotel_admin_system') ?> &middot; System Access Setup</p>
             </div>
 
-            <?php if (!empty($error)): ?>
-            <div class="auth-alert">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <?= htmlspecialchars($error) ?>
+            <div id="alert-container">
+                <?php if (!empty($error)): ?>
+                <div class="auth-alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div><?= htmlspecialchars($error) ?></div>
+                </div>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
 
-            <form action="<?= BASE_URL ?>/register/post" method="POST">
+            <form action="<?= BASE_URL ?>/register/post" method="POST" id="register-form">
 
                 <label class="field-label"><?= __('name') ?></label>
                 <div class="auth-input-group">
@@ -208,22 +231,30 @@
                     <input type="email" name="email" placeholder="admin@hotel-aura.com" required>
                 </div>
 
-                <div class="row g-3 mb-4">
+                <div class="row g-3">
                     <div class="col-6">
                         <label class="field-label"><?= __('password') ?></label>
                         <div class="auth-input-group mb-0">
                             <span class="prefix"><i class="bi bi-lock-fill"></i></span>
-                            <input type="password" name="password" placeholder="••••••••" required>
+                            <input type="password" name="password" id="password" placeholder="••••••••" required onkeyup="checkStrength(this.value)">
+                            <span class="password-toggle" onclick="togglePass('password', this)"><i class="bi bi-eye-slash-fill"></i></span>
                         </div>
+                        <div class="strength-p-wrapper">
+                            <div class="strength-p-bar" id="strength-bar"></div>
+                        </div>
+                        <div id="strength-text" class="strength-label">Security check...</div>
                     </div>
                     <div class="col-6">
                         <label class="field-label"><?= __('confirm_password') ?></label>
                         <div class="auth-input-group mb-0">
                             <span class="prefix"><i class="bi bi-shield-check"></i></span>
-                            <input type="password" name="confirm_password" placeholder="••••••••" required>
+                            <input type="password" name="confirm_password" id="confirm_password" placeholder="••••••••" required>
+                            <span class="password-toggle" onclick="togglePass('confirm_password', this)"><i class="bi bi-eye-slash-fill"></i></span>
                         </div>
                     </div>
                 </div>
+
+                <div class="mb-4"></div>
 
                 <!-- Role cards -->
                 <label class="field-label"><i class="bi bi-person-badge-fill me-1"></i><?= __('role') ?> *</label>
@@ -237,28 +268,33 @@
                         <div class="role-desc">Standard access, manage day-to-day hotel operations</div>
                     </label>
 
-                    <?php if (!($superAdminExists ?? false)): ?>
                     <label class="role-card role-super-card" id="card-super" for="role-super">
                         <input type="radio" name="role" id="role-super" value="super_admin">
                         <div class="role-check"><i class="bi bi-check2"></i></div>
                         <div class="role-icon role-icon-super"><i class="bi bi-shield-fill-check"></i></div>
                         <div class="role-title">Super Admin</div>
-                        <div class="role-desc">Full control including user management &amp; system settings</div>
+                        <div class="role-desc">Full access &mdash; Requires Access Key</div>
                     </label>
-                    <?php else: ?>
-                    <div class="role-card role-super-card" style="cursor:not-allowed;opacity:0.45;" title="Super Admin slot is already taken">
-                        <div class="role-icon role-icon-super"><i class="bi bi-shield-fill-check"></i></div>
-                        <div class="role-title">Super Admin</div>
-                        <div class="role-desc">Already assigned &mdash; only one Super Admin allowed</div>
-                        <div style="position:absolute;top:10px;right:10px;font-size:0.8rem;color:#f87171;"><i class="bi bi-lock-fill"></i></div>
-                    </div>
-                    <?php endif; ?>
 
                 </div>
 
-                <button type="submit" class="btn-register">
-                    <i class="bi bi-person-plus-fill me-2"></i>
-                    <?= __('create_account') ?>
+                <!-- ── ACCESS KEY FIELD (Hidden initially) ───────────── -->
+                <div id="access-key-wrapper" style="display: none;">
+                    <label class="field-label" style="color:#f87171;">
+                        <i class="bi bi-key-fill me-1"></i> MASTER ACCESS KEY *
+                    </label>
+                    <div class="auth-input-group" style="border-color: rgba(220,38,38,0.25);">
+                        <span class="prefix" style="color:#f87171;"><i class="bi bi-shield-lock"></i></span>
+                        <input type="password" name="access_key" id="access_key_input" placeholder="Enter System Master Key">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-register" id="btn-submit">
+                    <div class="spinner-border text-light" role="status" id="spinner"></div>
+                    <span id="btn-text">
+                        <i class="bi bi-person-plus-fill me-2"></i>
+                        <?= __('create_account') ?>
+                    </span>
                 </button>
 
             </form>
@@ -272,19 +308,138 @@
 </div>
 
 <script>
-document.querySelectorAll('input[name="role"]').forEach(function(radio) {
-    radio.addEventListener('change', function() {
-        var cardAdmin = document.getElementById('card-admin');
-        var cardSuper = document.getElementById('card-super');
+document.querySelectorAll('.role-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+        const role = this.querySelector('input[type="radio"]')?.value;
+        if (!role) return;
+
+        const cardAdmin = document.getElementById('card-admin');
+        const cardSuper = document.getElementById('card-super') || this;
+        const accessKeyWrapper = document.getElementById('access-key-wrapper');
+        const accessKeyInput = document.getElementById('access_key_input');
+
         cardAdmin.classList.remove('selected-admin', 'selected-super');
         cardSuper.classList.remove('selected-admin', 'selected-super');
-        if (this.value === 'admin') {
+
+        if (role === 'admin') {
             cardAdmin.classList.add('selected-admin');
-        } else {
+            accessKeyWrapper.style.display = 'none';
+            accessKeyInput.removeAttribute('required');
+        } else if (role === 'super_admin') {
             cardSuper.classList.add('selected-super');
+            accessKeyWrapper.style.display = 'block';
+            accessKeyInput.setAttribute('required', 'required');
+            accessKeyInput.focus();
         }
     });
 });
+
+function togglePass(id, el) {
+    const input = document.getElementById(id);
+    const icon = el.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+    }
+}
+
+function checkStrength(password) {
+    const bar = document.getElementById('strength-bar');
+    const text = document.getElementById('strength-text');
+    let strength = 0;
+    
+    if (password.length > 0) strength += 20; // Base strength if text present
+    if (password.length >= 8) strength += 20;
+    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 20;
+    if (password.match(/\d/)) strength += 20;
+    if (password.match(/[^a-zA-Z\d]/)) strength += 20;
+
+    bar.style.width = strength + '%';
+    
+    if (password.length === 0) {
+        bar.style.width = '0%';
+        bar.style.background = 'transparent';
+        text.innerText = 'Enter your password';
+        text.style.color = 'rgba(255,255,255,0.4)';
+    } else if (strength <= 20) {
+        bar.style.background = '#f87171';
+        text.innerText = 'Weak';
+        text.style.color = '#f87171';
+    } else if (strength <= 40) {
+        bar.style.background = '#f59e0b';
+        text.innerText = 'Fair';
+        text.style.color = '#f59e0b';
+    } else if (strength <= 60) {
+        bar.style.background = '#60a5fa';
+        text.innerText = 'Good';
+        text.style.color = '#60a5fa';
+    } else if (strength <= 80) {
+        bar.style.background = '#a78bfa';
+        text.innerText = 'Strong';
+        text.style.color = '#a78bfa';
+    } else {
+        bar.style.background = '#34d399';
+        text.innerText = 'Very Secure';
+        text.style.color = '#34d399';
+    }
+}
+
+// ── AJAX REGISTRATION ──────────────────────────
+const registerForm = document.getElementById('register-form');
+const btnSubmit = document.getElementById('btn-submit');
+const btnText = document.getElementById('btn-text');
+const spinner = document.getElementById('spinner');
+const alertContainer = document.getElementById('alert-container');
+
+if (registerForm) {
+    registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        btnSubmit.disabled = true;
+        btnText.style.opacity = '0.5';
+        spinner.style.display = 'block';
+        alertContainer.innerHTML = '';
+
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect || '<?= BASE_URL ?>/dashboard';
+            } else {
+                alertContainer.innerHTML = `
+                    <div class="auth-alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div>${data.message || 'Registration failed.'}</div>
+                    </div>
+                `;
+                btnSubmit.disabled = false;
+                btnText.style.opacity = '1';
+                spinner.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alertContainer.innerHTML = `
+                <div class="auth-alert">
+                    <i class="bi bi-bug-fill"></i>
+                    <div>Connection error. Please try again.</div>
+                </div>
+            `;
+            btnSubmit.disabled = false;
+            btnText.style.opacity = '1';
+            spinner.style.display = 'none';
+        });
+    });
+}
 </script>
 </body>
 </html>

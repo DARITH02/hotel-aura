@@ -52,7 +52,8 @@ class Controller {
      * Centralized Telegram Sender
      */
     protected function sendTelegramMessage($chatId, $message) {
-        $config = require ROOT_DIR . DS . 'config' . DS . 'config.php';
+        $configFile = ROOT_DIR . '/config/config.php';
+        $config = file_exists($configFile) ? require $configFile : [];
         $botToken = $config['telegram']['bot_token'] ?? "";
         $url = "https://api.telegram.org/bot" . $botToken . "/sendMessage";
         

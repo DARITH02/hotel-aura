@@ -88,6 +88,15 @@ $routes = [
 if (array_key_exists($url, $routes)) {
     $controllerName = $routes[$url][0];
     $methodName = $routes[$url][1];
+    
+    // Explicitly check for the controller file if not loaded by autoloader
+    if (!class_exists($controllerName)) {
+        $controllerFile = APP_DIR . '/controllers/' . $controllerName . '.php';
+        if (file_exists($controllerFile)) {
+            require_once $controllerFile;
+        }
+    }
+
     if (class_exists($controllerName)) {
         $controller = new $controllerName();
         if (method_exists($controller, $methodName)) {
@@ -96,10 +105,37 @@ if (array_key_exists($url, $routes)) {
             die("Method $methodName not found in $controllerName");
         }
     } else {
-        die("Controller $controllerName not found");
+        // More descriptive error for debugging
+        $checkedPath = defined('APP_DIR') ? APP_DIR . '/controllers/' . $controllerName . '.php' : 'APP_DIR not defined';
+        
+        // Diagnostic: List files in the controllers directory
+        $dirToScan = defined('APP_DIR') ? APP_DIR . '/controllers' : '';
+        $filesInDir = "Directory not found";
+        if (is_dir($dirToScan)) {
+            $files = scandir($dirToScan);
+            $filesInDir = implode(', ', $files);
+        }
+
+        // Diagnostic: List files in the root
+        $rootDir = defined('ROOT_DIR') ? ROOT_DIR : '';
+        $rootFiles = "Root directory not found";
+        if (is_dir($rootDir)) {
+            $files = scandir($rootDir);
+            $rootFiles = implode(', ', $files);
+        }
+
+        die("Controller $controllerName not found.<br>
+             Checked: $checkedPath<br>
+             Files in controllers folder: $filesInDir<br>
+             Files in root folder: $rootFiles");
     }
 } else {
     // Luxury 404 Page
     header("HTTP/1.0 404 Not Found");
-    include __DIR__ . '/../app/views/errors/404.php';
+    $errorPage = APP_DIR . '/views/errors/404.php';
+    if (file_exists($errorPage)) {
+        include $errorPage;
+    } else {
+        die("404 Not Found - Error page missing at: $errorPage");
+    }
 }

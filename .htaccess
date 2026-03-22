@@ -1,8 +1,8 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Prevent loop by not rewriting if the URI already starts with /public/
-    RewriteCond %{REQUEST_URI} !^/public/
+    # Prevent loop by not rewriting if the URI already contains /public/
+    RewriteCond %{REQUEST_URI} !/public/
     
     # Handle assets and index.php routing
     RewriteRule ^(.*)$ public/$1 [L]
